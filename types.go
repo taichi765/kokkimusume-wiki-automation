@@ -17,3 +17,8 @@ type GetPageResponse struct {
 	Source    string `json:"source"`
 	Timestamp string `json:"timestamp"`
 }
+
+// Request for `PUT https://api.wikiwiki.jp/<wiki-name>/page/<page-name>`
+type PutPageRequest struct {
+	Source string `json:"source"`
+}

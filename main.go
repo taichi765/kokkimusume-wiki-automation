@@ -3,7 +3,6 @@ package main
 import (
 	"bytes"
 	"encoding/json"
-	"fmt"
 	"log"
 	"net/http"
 	"os"
@@ -13,16 +12,43 @@ import (
 
 const API_ENDPOINT_BASE = "https://api.wikiwiki.jp/kokkimusume"
 
+type CharacterData struct {
+	name                string
+	area                string
+	firstAppearenceDate string
+}
+
 func main() {
 	err := godotenv.Load()
 	if err != nil {
 		log.Fatal("failed to read dotenv")
 	}
 
+	charas, err := loadCharaData()
+	if err != nil {
+		log.Fatalf("failed to load character data: %v", err)
+	}
+
 	tok := getAuthToken()
-	c := http.Client{}
-	src := getPageContent(&c, "FrontPage", tok)
-	fmt.Println(src)
+	c := &http.Client{}
+	charaListSrc := getPageContent(c, "キャラ一覧", tok)
+	menubarSrc := getPageContent(c, "MenuBar", tok)
+
+	newCharaListSrc, err := editCharaListPage(charaListSrc, charas)
+	if err != nil {
+		log.Fatal(err)
+	}
+	newMenubarSrc, err := editMenuBar(menubarSrc)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	if err := putPageContent(c, "キャラ一覧", newCharaListSrc, tok); err != nil {
+		log.Fatal(err)
+	}
+	if err := putPageContent(c, "MenuBar", newMenubarSrc, tok); err != nil {
+		log.Fatal(err)
+	}
 }
 
 // getAuthToken gets token from wikiwiki's REST API.
@@ -55,6 +81,7 @@ func getAuthToken() string {
 	return resJson.Token
 }
 
+// Gets page content from WikiWiki's REST API.
 func getPageContent(c *http.Client, page string, tok string) string {
 	endpoint := API_ENDPOINT_BASE + "/page/" + page
 	req, err := http.NewRequest(http.MethodGet, endpoint, nil)
@@ -76,4 +103,9 @@ func getPageContent(c *http.Client, page string, tok string) string {
 	}
 
 	return resJson.Source
+}
+
+// Updates page content using WikiWiki's REST API.
+func putPageContent(c *http.Client, page string, content string, tok string) error {
+	panic("TODO")
 }
