@@ -13,7 +13,7 @@ jobs:
       - uses: actions/setup-go@v7
         with:
           go-version-file: ./go.work
-      - run: go run .
+      - run: go run ./page-updater/
         env:
           WIKIWIKI_PASSWORD: ${{ secrets.WIKIWIKI_PASSWORD }}
     
