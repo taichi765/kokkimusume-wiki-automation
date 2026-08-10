@@ -7,7 +7,7 @@ import (
 	"os"
 )
 
-const CSV_PATH = "./data/charas.csv"
+const CSV_PATH = "../data/charas.csv"
 
 // Loads character data from csv.
 func loadCharaData() ([]CharacterData, error) {

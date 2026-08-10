@@ -1,4 +1,4 @@
-module kokkimusume-wiki
+module github.com/taichi765/kokkimusume-wiki-automation/page-updater
 
 go 1.26.5
 
