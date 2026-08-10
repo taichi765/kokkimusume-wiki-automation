@@ -3,10 +3,12 @@ package main
 import (
 	"bytes"
 	"encoding/json"
+	"fmt"
 	"log"
 	"net/http"
 	"os"
 	"slices"
+	"strconv"
 
 	"github.com/joho/godotenv"
 )
@@ -38,9 +40,15 @@ func main() {
 	}
 
 	tok := getAuthToken()
+	fmt.Println("successfully got token")
+
 	c := &http.Client{}
+
 	charaListSrc := getPageContent(c, "キャラ一覧", tok)
+	fmt.Println("successfully fetched content for character list page")
+
 	menubarSrc := getPageContent(c, "MenuBar", tok)
+	fmt.Println("successfully fetched content for menu bar")
 
 	newCharaListSrc, err := editCharaListPage(charaListSrc, charas)
 	if err != nil {
@@ -54,9 +62,12 @@ func main() {
 	if err := putPageContent(c, "キャラ一覧", newCharaListSrc, tok); err != nil {
 		log.Fatal(err)
 	}
+	fmt.Println("successfully updated character list page")
+
 	if err := putPageContent(c, "MenuBar", newMenubarSrc, tok); err != nil {
 		log.Fatal(err)
 	}
+	fmt.Println("successfully updated menu bar")
 }
 
 // getAuthToken gets token from wikiwiki's REST API.
@@ -115,5 +126,39 @@ func getPageContent(c *http.Client, page string, tok string) string {
 
 // Updates page content using WikiWiki's REST API.
 func putPageContent(c *http.Client, page string, content string, tok string) error {
-	panic("TODO")
+	endpoint := API_ENDPOINT_BASE + "/page/" + page
+	body, err := json.Marshal(PutPageRequest{
+		Source: content,
+	})
+	if err != nil {
+		panic("json must be valid")
+	}
+
+	req, err := http.NewRequest(http.MethodPut, endpoint, bytes.NewBuffer(body))
+	if err != nil {
+		panic("request must be valid")
+	}
+	req.Header.Add("Authorization", "Bearer "+tok)
+
+	res, err := c.Do(req)
+	if err != nil {
+		return fmt.Errorf("failed to update content: %w", err)
+	}
+	defer res.Body.Close()
+
+	var resJson PutPageResponse
+	err = json.NewDecoder(res.Body).Decode(&resJson)
+	if err != nil {
+		return fmt.Errorf("failed to decode response: %w", err)
+	}
+
+	status, err := strconv.Atoi(resJson.Status)
+	if err != nil {
+		return fmt.Errorf("status field in response was not integar: %w", err)
+	}
+	if status != http.StatusOK {
+		return fmt.Errorf("something went wrong while updating page content: status code %v", status)
+	}
+
+	return nil
 }
