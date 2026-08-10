@@ -28,9 +28,9 @@ func areaIsValid(area string) bool {
 }
 
 func main() {
-	err := godotenv.Load()
+	passwd, err := loadPassword()
 	if err != nil {
-		log.Fatal("failed to read dotenv")
+		log.Fatalf("failed to load password: %v", err)
 	}
 
 	charas, err := loadCharaData()
@@ -38,7 +38,7 @@ func main() {
 		log.Fatalf("failed to load character data: %v", err)
 	}
 
-	tok := getAuthToken()
+	tok := getAuthToken(passwd)
 	fmt.Println("successfully got token")
 
 	c := &http.Client{}
@@ -69,10 +69,29 @@ func main() {
 	fmt.Println("successfully updated menu bar")
 }
 
+// 環境変数または.envからパスワードを取得する
+func loadPassword() (string, error) {
+	passwd, ok := os.LookupEnv("WIKIWIKI_PASSWORD")
+	if ok {
+		return passwd, nil
+	}
+
+	err := godotenv.Load()
+	if err != nil {
+		return "", fmt.Errorf("failed to read dotenv")
+	}
+
+	passwd, ok = os.LookupEnv("WIKIWIKI_PASSWORD")
+	if !ok {
+		return "", fmt.Errorf("can't find WIKIWIKI_PASSWORD in both env vars and .env file")
+	}
+	return passwd, nil
+}
+
 // getAuthToken gets token from wikiwiki's REST API.
-func getAuthToken() string {
+func getAuthToken(passwd string) string {
 	body, err := json.Marshal(AuthRequest{
-		Password: os.Getenv("WIKIWIKI_PASSWORD"),
+		Password: passwd,
 	})
 	if err != nil {
 		log.Fatal("failed to marshal auth request")
