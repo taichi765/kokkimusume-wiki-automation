@@ -22,9 +22,9 @@ func editCharaListPage(old string, charas []CharacterData) (string, error) {
 }
 
 func generateCharaListPageContent(charas []CharacterData) (string, error) {
-	tmpl, err := template.New("table_item").Parse(`
-	|{{.Name}}|{{.Area}}|{{.FirstAppearenceDate}}|
-	`)
+	tmpl, err := template.New("table_item").Parse(
+		`|[[{{.Name}}]]|{{.Area}}|{{.FirstAppearenceDate}}|
+`)
 	if err != nil {
 		panic("template must be valid")
 	}
