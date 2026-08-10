@@ -66,17 +66,66 @@ func TestFindLinesToEditNormal(t *testing.T) {
 
 func TestFindLinesToEditError(t *testing.T) {
 	testCases := []struct {
-		desc   string
-		src    string
-		expect string
+		desc string
+		src  string
 	}{
 		{
-			desc: "",
+			desc: "without @generated_end",
+			src: `
+			TITLE:テストページ
+
+			//@generated_start
+			[[なんか]]
+			[[なんか2]]
+			//@gonorotod_end
+			`,
+		},
+		{
+			desc: "without @generated_start",
+			src: `
+			TITLE:テストページ
+			//@gonototod_start
+			[[なんか]]
+			[[なんか2]]
+			//@generated_end
+			`,
+		},
+		{
+			desc: "multiple start",
+			src: `
+			TITLE:テストページ
+			//@generated_start
+			[[なんか]]
+			//@generated_start
+			[[なんか2]]
+			//@generated_end
+			`,
+		},
+		{
+			desc: "multiple end",
+			src: `
+			TITLE:テストページ
+			//@generated_start
+			[[なんか]]
+			//@generated_end
+			[[なんか2]]
+			//@generated_end
+			`,
+		},
+		{
+			desc: "end before start",
+			src: `
+			TITLE:テストページ
+			[[なんか]]
+			//@generated_end
+			[[なんか2]]
+			//@generated_start`,
 		},
 	}
 	for _, tC := range testCases {
 		t.Run(tC.desc, func(t *testing.T) {
-
+			_, _, err := findLinesToEdit(tC.src)
+			assert.NotNil(t, err)
 		})
 	}
 }
