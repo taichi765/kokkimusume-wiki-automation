@@ -6,6 +6,7 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"slices"
 
 	"github.com/joho/godotenv"
 )
@@ -16,6 +17,13 @@ type CharacterData struct {
 	Name                string
 	Area                string
 	FirstAppearenceDate string
+}
+
+var validAreas = []string{"東アジア", "東南アジア・南アジア", "中東", "ヨーロッパ", "オセアニア", "北米", "中南米", "アフリカ"}
+
+// Returns whether the given area is valid or not.
+func areaIsValid(area string) bool {
+	return slices.Contains(validAreas, area)
 }
 
 func main() {
@@ -38,7 +46,7 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
-	newMenubarSrc, err := editMenuBar(menubarSrc)
+	newMenubarSrc, err := editMenuBar(menubarSrc, charas)
 	if err != nil {
 		log.Fatal(err)
 	}

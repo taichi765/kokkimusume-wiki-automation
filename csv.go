@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"io"
 	"os"
-	"slices"
 )
 
 const CSV_PATH = "./data/charas.csv"
@@ -50,10 +49,4 @@ func loadCharaData() ([]CharacterData, error) {
 	}
 
 	return charas, nil
-}
-
-// Returns whether the given area is valid or not.
-func areaIsValid(area string) bool {
-	validAreas := []string{"東アジア", "東南アジア・南アジア", "中東", "ヨーロッパ", "オセアニア", "北米", "中南米", "アフリカ"}
-	return slices.Contains(validAreas, area)
 }

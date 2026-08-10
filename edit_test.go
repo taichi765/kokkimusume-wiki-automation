@@ -7,19 +7,40 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-func sampleCharaData() []CharacterData {
-	return []CharacterData{
-		{
-			Name:                "日本",
-			Area:                "東アジア",
-			FirstAppearenceDate: "2026/06/07",
-		},
-		{
-			Name:                "韓国",
-			Area:                "東アジア",
-			FirstAppearenceDate: "2026/06/07",
-		},
-	}
+var sampleCharaData = []CharacterData{
+	{
+		Name:                "日本",
+		Area:                "東アジア",
+		FirstAppearenceDate: "2026/06/07",
+	},
+	{
+		Name:                "韓国",
+		Area:                "東アジア",
+		FirstAppearenceDate: "2026/06/07",
+	},
+}
+
+var multipleAreasCharaData = []CharacterData{
+	{
+		Name:                "日本",
+		Area:                "東アジア",
+		FirstAppearenceDate: "2026/06/07",
+	},
+	{
+		Name:                "韓国",
+		Area:                "東アジア",
+		FirstAppearenceDate: "2026/06/07",
+	},
+	{
+		Name:                "イタリア",
+		Area:                "ヨーロッパ",
+		FirstAppearenceDate: "2026/06/29",
+	},
+	{
+		Name:                "カナダ",
+		Area:                "北米",
+		FirstAppearenceDate: "2026/06/13",
+	},
 }
 
 func TestSplitLinesToEditNormal(t *testing.T) {
@@ -165,7 +186,7 @@ hogehoge
 //@generated_end
 fugafuga
 `,
-			charas: sampleCharaData(),
+			charas: sampleCharaData,
 			expect: `
 TITLE:テストページ
 //@generated_start
@@ -183,6 +204,49 @@ fugafuga
 		t.Run(tC.desc, func(t *testing.T) {
 			got, err := editCharaListPage(tC.old, tC.charas)
 			require.Nil(t, err)
+			assert.Equal(t, tC.expect, got)
+		})
+	}
+}
+
+func TestEditMenuBar(t *testing.T) {
+	testCases := []struct {
+		desc   string
+		old    string
+		charas []CharacterData
+		expect string
+	}{
+		{
+			desc: "normal",
+			old: `TITLE:テストページ
+//@generated_start
+hogehoge
+//@generated_end
+fugafuga`,
+			charas: multipleAreasCharaData,
+			expect: `TITLE:テストページ
+//@generated_start
+** 東アジア
+- [[日本]]
+- [[韓国]]
+** 東南アジア・南アジア
+** 中東
+** ヨーロッパ
+- [[イタリア]]
+** オセアニア
+** 北米
+- [[カナダ]]
+** 中南米
+** アフリカ
+//@generated_end
+fugafuga
+`,
+		},
+	}
+	for _, tC := range testCases {
+		t.Run(tC.desc, func(t *testing.T) {
+			got, err := editMenuBar(tC.old, tC.charas)
+			require.Nil(t, err, "should succeed")
 			assert.Equal(t, tC.expect, got)
 		})
 	}

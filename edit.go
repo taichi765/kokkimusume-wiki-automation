@@ -43,8 +43,40 @@ func generateCharaListPageContent(charas []CharacterData) (string, error) {
 	return b.String(), nil
 }
 
-func editMenuBar(old string) (string, error) {
-	panic("TODO")
+func editMenuBar(old string, charas []CharacterData) (string, error) {
+	beforeStart, afterEnd, err := splitLinesToEdit(old)
+	if err != nil {
+		return "", err
+	}
+
+	generated := generateMenuBarContent(charas)
+
+	return beforeStart + generated + afterEnd, nil
+}
+
+func generateMenuBarContent(charas []CharacterData) string {
+	byArea := charasByArea(charas)
+	b := &strings.Builder{}
+	for _, a := range validAreas {
+		chs := byArea[a]
+		fmt.Fprintf(b, "** %v\n", a)
+		for _, c := range chs {
+			fmt.Fprintf(b, "- [[%v]]\n", c.Name)
+		}
+	}
+	return b.String()
+}
+
+func charasByArea(charas []CharacterData) map[string][]CharacterData {
+	byArea := make(map[string][]CharacterData, len(validAreas))
+	for _, ch := range charas {
+		if charas, ok := byArea[ch.Area]; ok {
+			byArea[ch.Area] = append(charas, ch)
+		} else {
+			byArea[ch.Area] = []CharacterData{ch}
+		}
+	}
+	return byArea
 }
 
 // @generated_startがある行まで(含む)と@generated_endがある行以降(含む)
