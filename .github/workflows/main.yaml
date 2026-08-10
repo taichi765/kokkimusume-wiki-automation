@@ -1,7 +1,9 @@
-name: Workflow
+name: Update Pages
 on:
   push:
   workflow_dispatch:
+  schedule:
+    - cron: "0 19 * * *"
 
 jobs:
   generate_page:
