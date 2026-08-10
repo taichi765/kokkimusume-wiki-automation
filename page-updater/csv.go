@@ -5,12 +5,14 @@ import (
 	"fmt"
 	"io"
 	"os"
+
+	"github.com/taichi765/kokkimusume-wiki-automation/common"
 )
 
 const CSV_PATH = "../data/charas.csv"
 
 // Loads character data from csv.
-func loadCharaData() ([]CharacterData, error) {
+func loadCharaData() ([]common.CharacterData, error) {
 	f, err := os.Open(CSV_PATH)
 	if err != nil {
 		return nil, fmt.Errorf("failed to open csv file: %w", err)
@@ -28,7 +30,7 @@ func loadCharaData() ([]CharacterData, error) {
 		return nil, fmt.Errorf("invalid header: %v", r)
 	}
 
-	charas := []CharacterData{}
+	charas := []common.CharacterData{}
 	for {
 		r, err := rd.Read()
 		if err == io.EOF {
@@ -38,10 +40,10 @@ func loadCharaData() ([]CharacterData, error) {
 			return nil, err
 		}
 
-		if !areaIsValid(r[1]) {
+		if !common.AreaIsValid(r[1]) {
 			return nil, fmt.Errorf("invalid area: %v", r[1])
 		}
-		charas = append(charas, CharacterData{
+		charas = append(charas, common.CharacterData{
 			Name:                r[0],
 			Area:                r[1],
 			FirstAppearenceDate: r[2],

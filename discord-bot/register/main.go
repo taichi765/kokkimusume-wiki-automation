@@ -5,10 +5,11 @@ import (
 	"fmt"
 	"log"
 	"log/slog"
+	"os"
 
 	"github.com/disgoorg/disgo"
 	"github.com/disgoorg/disgo/discord"
-	"github.com/taichi765/kokkimusume-wiki-automation/discord-bot/utils"
+	"github.com/joho/godotenv"
 )
 
 var commands = []discord.ApplicationCommandCreate{
@@ -25,9 +26,28 @@ var commands = []discord.ApplicationCommandCreate{
 	},
 }
 
+// 環境変数または.envからDicordのトークンを読む
+func loadDiscordToken() (string, error) {
+	tok, ok := os.LookupEnv("DISCORD_TOKEN")
+	if ok {
+		return tok, nil
+	}
+
+	err := godotenv.Load()
+	if err != nil {
+		return "", err
+	}
+
+	tok, ok = os.LookupEnv("DISCORD_TOKEN")
+	if !ok {
+		return "", fmt.Errorf("can't find DISCORD_TOKEN in both env vars and .env file")
+	}
+	return tok, nil
+}
+
 func main() {
 	slog.Info("loading discord token")
-	tok, err := utils.LoadDiscordToken()
+	tok, err := loadDiscordToken()
 
 	if err != nil {
 		slog.Error("failed to load discord's token", slog.Any("err", err))

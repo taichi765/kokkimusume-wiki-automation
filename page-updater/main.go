@@ -7,25 +7,11 @@ import (
 	"log"
 	"net/http"
 	"os"
-	"slices"
 
 	"github.com/joho/godotenv"
 )
 
 const API_ENDPOINT_BASE = "https://api.wikiwiki.jp/kokkimusume"
-
-type CharacterData struct {
-	Name                string
-	Area                string
-	FirstAppearenceDate string
-}
-
-var validAreas = []string{"東アジア", "東南アジア・南アジア", "中東", "ヨーロッパ", "オセアニア", "北米", "中南米", "アフリカ"}
-
-// Returns whether the given area is valid or not.
-func areaIsValid(area string) bool {
-	return slices.Contains(validAreas, area)
-}
 
 func main() {
 	passwd, err := loadPassword()

@@ -5,9 +5,11 @@ import (
 	"fmt"
 	"strings"
 	"text/template"
+
+	"github.com/taichi765/kokkimusume-wiki-automation/common"
 )
 
-func editCharaListPage(old string, charas []CharacterData) (string, error) {
+func editCharaListPage(old string, charas []common.CharacterData) (string, error) {
 	beforeStart, afterEnd, err := splitLinesToEdit(old)
 	if err != nil {
 		return "", err
@@ -21,7 +23,7 @@ func editCharaListPage(old string, charas []CharacterData) (string, error) {
 	return beforeStart + generated + afterEnd, nil
 }
 
-func generateCharaListPageContent(charas []CharacterData) (string, error) {
+func generateCharaListPageContent(charas []common.CharacterData) (string, error) {
 	tmpl, err := template.New("table_item").Parse(
 		`|[[{{.Name}}]]|{{.Area}}|{{.FirstAppearenceDate}}|
 `)
@@ -43,7 +45,7 @@ func generateCharaListPageContent(charas []CharacterData) (string, error) {
 	return b.String(), nil
 }
 
-func editMenuBar(old string, charas []CharacterData) (string, error) {
+func editMenuBar(old string, charas []common.CharacterData) (string, error) {
 	beforeStart, afterEnd, err := splitLinesToEdit(old)
 	if err != nil {
 		return "", err
@@ -54,10 +56,10 @@ func editMenuBar(old string, charas []CharacterData) (string, error) {
 	return beforeStart + generated + afterEnd, nil
 }
 
-func generateMenuBarContent(charas []CharacterData) string {
+func generateMenuBarContent(charas []common.CharacterData) string {
 	byArea := charasByArea(charas)
 	b := &strings.Builder{}
-	for _, a := range validAreas {
+	for _, a := range common.ValidAreas {
 		chs := byArea[a]
 		fmt.Fprintf(b, "** %v\n", a)
 		for _, c := range chs {
@@ -67,13 +69,13 @@ func generateMenuBarContent(charas []CharacterData) string {
 	return b.String()
 }
 
-func charasByArea(charas []CharacterData) map[string][]CharacterData {
-	byArea := make(map[string][]CharacterData, len(validAreas))
+func charasByArea(charas []common.CharacterData) map[string][]common.CharacterData {
+	byArea := make(map[string][]common.CharacterData, len(common.ValidAreas))
 	for _, ch := range charas {
 		if charas, ok := byArea[ch.Area]; ok {
 			byArea[ch.Area] = append(charas, ch)
 		} else {
-			byArea[ch.Area] = []CharacterData{ch}
+			byArea[ch.Area] = []common.CharacterData{ch}
 		}
 	}
 	return byArea

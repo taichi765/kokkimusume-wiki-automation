@@ -2,9 +2,11 @@ package main
 
 import (
 	"context"
+	"fmt"
 	"log/slog"
 	"os"
 	"os/signal"
+	"strconv"
 	"syscall"
 
 	"github.com/disgoorg/disgo"
@@ -12,18 +14,86 @@ import (
 	"github.com/disgoorg/disgo/discord"
 	"github.com/disgoorg/disgo/events"
 	"github.com/disgoorg/disgo/gateway"
-	"github.com/taichi765/kokkimusume-wiki-automation/discord-bot/utils"
+	"github.com/joho/godotenv"
 )
 
-func main() {
-	slog.Info("loading discord token")
-	tok, err := utils.LoadDiscordToken()
-	if err != nil {
-		slog.Error("failed to load discord's token", slog.Any("err", err))
-	}
-	slog.Info("successfully loaded discord token")
+type EnvVars struct {
+	githubAppId          int64
+	githubInstallationId int64
+	discordAppId         string
+	discordToken         string
+	discordPublicKey     string
+}
 
-	client, err := disgo.New(tok,
+func loadEnvVars() (*EnvVars, error) {
+	dotEnvLoaded := false
+	load := func(name string) (string, error) {
+		v, ok := os.LookupEnv(name)
+		if !ok && dotEnvLoaded {
+			return "", fmt.Errorf("can't find %s in both env vars and .env file", name)
+		}
+		if !ok && !dotEnvLoaded {
+			err := godotenv.Load()
+			if err != nil {
+				return "", fmt.Errorf("failed to load dotenv: %w", err)
+			}
+			dotEnvLoaded = true
+
+			v, ok = os.LookupEnv(name)
+			if !ok {
+				return "", fmt.Errorf("can't find %s in both env vars and .env file", name)
+			}
+		}
+		return v, nil
+	}
+
+	discordToken, err := load("DISCORD_TOKEN")
+	if err != nil {
+		return nil, err
+	}
+	discordAppId, err := load("DISCORD_APP_ID")
+	if err != nil {
+		return nil, err
+	}
+	discordPublicKey, err := load("DISCORD_PUBLIC_KEY")
+	if err != nil {
+		return nil, err
+	}
+	githubAppIdStr, err := load("GITHUB_APP_ID")
+	if err != nil {
+		return nil, err
+	}
+	githubAppId, err := strconv.ParseInt(githubAppIdStr, 10, 64)
+	if err != nil {
+		return nil, err
+	}
+	githubInstallationIdStr, err := load("GITHUB_INSTALLATION_ID")
+	if err != nil {
+		return nil, err
+	}
+	githubInstallationId, err := strconv.ParseInt(githubInstallationIdStr, 10, 64)
+	if err != nil {
+		return nil, err
+	}
+
+	return &EnvVars{
+		discordToken:         discordToken,
+		discordAppId:         discordAppId,
+		discordPublicKey:     discordPublicKey,
+		githubAppId:          githubAppId,
+		githubInstallationId: githubInstallationId,
+	}, nil
+}
+
+func main() {
+	slog.Info("loading env vars")
+	envVars, err := loadEnvVars()
+	if err != nil {
+		slog.Error("failed to load env vars", slog.Any("err", err))
+	}
+	slog.Info("successfully loaded env vars")
+
+	client, err := disgo.New(envVars.discordToken,
 		bot.WithGatewayConfigOpts(
 			gateway.WithIntents(
 				gateway.IntentGuildMembers,
