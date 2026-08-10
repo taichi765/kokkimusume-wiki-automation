@@ -8,7 +8,6 @@ import (
 	"net/http"
 	"os"
 	"slices"
-	"strconv"
 
 	"github.com/joho/godotenv"
 )
@@ -139,6 +138,7 @@ func putPageContent(c *http.Client, page string, content string, tok string) err
 		panic("request must be valid")
 	}
 	req.Header.Add("Authorization", "Bearer "+tok)
+	req.Header.Add("Content-Type", "application/json")
 
 	res, err := c.Do(req)
 	if err != nil {
@@ -152,12 +152,8 @@ func putPageContent(c *http.Client, page string, content string, tok string) err
 		return fmt.Errorf("failed to decode response: %w", err)
 	}
 
-	status, err := strconv.Atoi(resJson.Status)
-	if err != nil {
-		return fmt.Errorf("status field in response was not integar: %w", err)
-	}
-	if status != http.StatusOK {
-		return fmt.Errorf("something went wrong while updating page content: status code %v", status)
+	if resJson.Status != "ok" {
+		return fmt.Errorf("something went wrong while updating page content: status was %v", resJson.Status)
 	}
 
 	return nil
