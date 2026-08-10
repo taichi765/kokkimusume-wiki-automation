@@ -8,7 +8,7 @@ import (
 )
 
 func editCharaListPage(old string, charas []CharacterData) (string, error) {
-	start, end, err := findLinesToEdit(old)
+	beforeStart, afterEnd, err := splitLinesToEdit(old)
 	if err != nil {
 		return "", err
 	}
@@ -18,12 +18,12 @@ func editCharaListPage(old string, charas []CharacterData) (string, error) {
 		return "", fmt.Errorf("failed to generate content for CharaList page: %w", err)
 	}
 
-	return old[:start+1] + generated + old[end:], nil
+	return beforeStart + generated + afterEnd, nil
 }
 
 func generateCharaListPageContent(charas []CharacterData) (string, error) {
-	tmpl, err := template.New("item").Parse(`
-	|{{.name}}|{{.area}}|{{.firstAppearenceDate}}|
+	tmpl, err := template.New("table_item").Parse(`
+	|{{.Name}}|{{.Area}}|{{.FirstAppearenceDate}}|
 	`)
 	if err != nil {
 		panic("template must be valid")
@@ -47,56 +47,64 @@ func editMenuBar(old string) (string, error) {
 	panic("TODO")
 }
 
-// Finds lines to be edited, which starts by `@generated_start` and ends by `@generated_end`.
-// Returns `(-1, -1, <error>)` if an error occured.
-//
-// Line number starts with 0.
-func findLinesToEdit(old string) (int, int, error) {
+// @generated_startがある行まで(含む)と@generated_endがある行以降(含む)
+func splitLinesToEdit(old string) (string, string, error) {
 	sc := bufio.NewScanner(strings.NewReader(old))
 
-	cnt := 0
-	var start_line int
-	start_line_found := false
-	var end_line int
-	end_line_found := false
+	var beforeStart, afterEnd strings.Builder
+	// 0: finding @generated_start
+	// 1: finding @generated_end
+	// 2: after @generated_end
+	phase := 0
 	for sc.Scan() {
 		line := sc.Text()
-		line = strings.Join(strings.Fields(line), "")
+		trimmed := strings.Join(strings.Fields(line), "")
 
-		if strings.HasPrefix(line, "//@generated_start") {
-			if start_line_found {
-				return -1, -1, fmt.Errorf("multiple `@generated_start` was found: first at %v, secound at %v", start_line, cnt)
+		if strings.HasPrefix(trimmed, "//@generated_end") {
+			switch phase {
+			case 0:
+				return "", "", fmt.Errorf("found @generated_end before finding @generated_start")
+			case 1:
+				phase = 2
+			case 2:
+				return "", "", fmt.Errorf("multiple @generated_end was found")
+			default:
+				panic("invalid phase")
 			}
-
-			start_line = cnt
-			start_line_found = true
 		}
 
-		if strings.HasPrefix(line, "//@generated_end") {
-			if end_line_found {
-				return -1, -1, fmt.Errorf("multiple `@generated_end` was found: first at %v, secound at %v", end_line, cnt)
+		switch phase {
+		case 0:
+			_, err := beforeStart.WriteString(line + "\n")
+			if err != nil {
+				return "", "", err
 			}
-			if !start_line_found {
-				return -1, -1, fmt.Errorf("found `@generated_end` at %v before finding `@generated_start`", cnt)
+		case 1:
+			// do nothing
+		case 2:
+			_, err := afterEnd.WriteString(line + "\n")
+			if err != nil {
+				return "", "", err
 			}
-
-			end_line = cnt
-			end_line_found = true
+		default:
+			panic("invalid phase")
 		}
 
-		cnt += 1
+		if strings.HasPrefix(trimmed, "//@generated_start") {
+			if phase != 0 {
+				return "", "", fmt.Errorf("multiple `@generated_start` was found")
+			}
+			phase = 1
+		}
 	}
 
 	if err := sc.Err(); err != nil {
-		return -1, -1, fmt.Errorf("an error occured while reading old page content: %w", err)
+		return "", "", fmt.Errorf("an error occured while reading old page content: %w", err)
 	}
 
-	if !start_line_found {
-		return -1, -1, fmt.Errorf("cannot find line starts with @generated_start")
-	}
-	if !end_line_found {
-		return -1, -1, fmt.Errorf("cannot find line starts with `@generated_end`")
+	if phase != 2 {
+		return "", "", fmt.Errorf("can't find @generated_start or @generated_end")
 	}
 
-	return start_line, end_line, nil
+	return beforeStart.String(), afterEnd.String(), nil
 }

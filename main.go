@@ -13,9 +13,9 @@ import (
 const API_ENDPOINT_BASE = "https://api.wikiwiki.jp/kokkimusume"
 
 type CharacterData struct {
-	name                string
-	area                string
-	firstAppearenceDate string
+	Name                string
+	Area                string
+	FirstAppearenceDate string
 }
 
 func main() {

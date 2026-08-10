@@ -7,125 +7,183 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-func TestFindLinesToEditNormal(t *testing.T) {
+func sampleCharaData() []CharacterData {
+	return []CharacterData{
+		{
+			Name:                "日本",
+			Area:                "東アジア",
+			FirstAppearenceDate: "2026/06/07",
+		},
+		{
+			Name:                "韓国",
+			Area:                "東アジア",
+			FirstAppearenceDate: "2026/06/07",
+		},
+	}
+}
+
+func TestSplitLinesToEditNormal(t *testing.T) {
 	testCases := []struct {
-		desc  string
-		src   string
-		start int
-		end   int
+		desc        string
+		src         string
+		beforeStart string
+		afterEnd    string
 	}{
 		{
 			desc: "without whitespace",
-			src: `
-			TITLE:テストページ
+			src: `TITLE:テストページ
 
-			//@generated_start
-			[[なんか]]
-			[[なんか2]]
-			//@generated_end
-			`,
-			start: 3,
-			end:   6,
+//@generated_start
+[[なんか]]
+[[なんか2]]
+//@generated_end
+`,
+			beforeStart: `TITLE:テストページ
+
+//@generated_start
+`,
+			afterEnd: `//@generated_end
+`,
 		},
 		{
 			desc: "with whitespace",
-			src: `
-			TITLE:テストページ
+			src: `TITLE:テストページ
 
-			// @generated_start
-			[[なんか]]
-			[[なんか2]]
-			//@generated_end
+// @generated_start
+[[なんか]]
+[[なんか2]]
+//@generated_end
 
-			`,
-			start: 3,
-			end:   6,
+`,
+			beforeStart: `TITLE:テストページ
+
+// @generated_start
+`,
+			afterEnd: `//@generated_end
+
+`,
 		},
 		{
 			desc: "with comment after keyword",
-			src: `
-			TITLE:テストページ
-			//@generated_start はーじまーるよー
-			[[なんか]]
-			[[なんか2]]
-			//@generated_end おーわりーだよー
-			`,
-			start: 2,
-			end:   5,
+			src: `TITLE:テストページ
+//@generated_start はーじまーるよー
+[[なんか]]
+[[なんか2]]
+//@generated_end おーわりーだよー
+`,
+			beforeStart: `TITLE:テストページ
+//@generated_start はーじまーるよー
+`,
+			afterEnd: `//@generated_end おーわりーだよー
+`,
 		},
 	}
 	for _, tC := range testCases {
 		t.Run(tC.desc, func(t *testing.T) {
-			start, end, err := findLinesToEdit(tC.src)
+			beforeStart, afterEnd, err := splitLinesToEdit(tC.src)
 			require.Nil(t, err, "should succeed")
-			assert.Equal(t, tC.start, start)
-			assert.Equal(t, tC.end, end)
+			assert.Equal(t, tC.beforeStart, beforeStart, "beforeStart should be equal")
+			assert.Equal(t, tC.afterEnd, afterEnd, "afterEnd should be equal")
 		})
 	}
 }
 
-func TestFindLinesToEditError(t *testing.T) {
+func TestSplitLinesToEditError(t *testing.T) {
 	testCases := []struct {
 		desc string
 		src  string
 	}{
 		{
 			desc: "without @generated_end",
-			src: `
-			TITLE:テストページ
+			src: `TITLE:テストページ
 
-			//@generated_start
-			[[なんか]]
-			[[なんか2]]
-			//@gonorotod_end
-			`,
+//@generated_start
+[[なんか]]
+[[なんか2]]
+//@gonorotod_end
+`,
 		},
 		{
 			desc: "without @generated_start",
-			src: `
-			TITLE:テストページ
-			//@gonototod_start
-			[[なんか]]
-			[[なんか2]]
-			//@generated_end
-			`,
+			src: `TITLE:テストページ
+//@gonototod_start
+[[なんか]]
+[[なんか2]]
+//@generated_end
+`,
 		},
 		{
 			desc: "multiple start",
-			src: `
-			TITLE:テストページ
-			//@generated_start
-			[[なんか]]
-			//@generated_start
-			[[なんか2]]
-			//@generated_end
-			`,
+			src: `TITLE:テストページ
+//@generated_start
+[[なんか]]
+//@generated_start
+[[なんか2]]
+//@generated_end
+`,
 		},
 		{
 			desc: "multiple end",
-			src: `
-			TITLE:テストページ
-			//@generated_start
-			[[なんか]]
-			//@generated_end
-			[[なんか2]]
-			//@generated_end
-			`,
+			src: `TITLE:テストページ
+//@generated_start
+[[なんか]]
+//@generated_end
+[[なんか2]]
+//@generated_end
+`,
 		},
 		{
 			desc: "end before start",
-			src: `
-			TITLE:テストページ
-			[[なんか]]
-			//@generated_end
-			[[なんか2]]
-			//@generated_start`,
+			src: `TITLE:テストページ
+[[なんか]]
+//@generated_end
+[[なんか2]]
+//@generated_start`,
 		},
 	}
 	for _, tC := range testCases {
 		t.Run(tC.desc, func(t *testing.T) {
-			_, _, err := findLinesToEdit(tC.src)
+			_, _, err := splitLinesToEdit(tC.src)
 			assert.NotNil(t, err)
+		})
+	}
+}
+
+func TestEditCharaListPage(t *testing.T) {
+	testCases := []struct {
+		desc   string
+		old    string
+		charas []CharacterData
+		expect string
+	}{
+		{
+			desc: "normal",
+			old: `
+TITLE:テストページ
+//@generated_start
+hogehoge
+//@generated_end
+fugafuga
+`,
+			charas: sampleCharaData(),
+			expect: `
+TITLE:テストページ
+//@generated_start
+#tablesort{{
+|名前|地域|初出|h
+|[[日本]]|東アジア|2026/06/07|
+|[[韓国]]|東アジア|2026/06/07|
+}}
+//@generated_end
+fugafuga
+`,
+		},
+	}
+	for _, tC := range testCases {
+		t.Run(tC.desc, func(t *testing.T) {
+			got, err := editCharaListPage(tC.old, tC.charas)
+			require.Nil(t, err)
+			assert.Equal(t, tC.expect, got)
 		})
 	}
 }

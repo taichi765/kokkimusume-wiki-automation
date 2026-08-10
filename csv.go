@@ -43,9 +43,9 @@ func loadCharaData() ([]CharacterData, error) {
 			return nil, fmt.Errorf("invalid area: %v", r[1])
 		}
 		charas = append(charas, CharacterData{
-			name:                r[0],
-			area:                r[1],
-			firstAppearenceDate: r[2],
+			Name:                r[0],
+			Area:                r[1],
+			FirstAppearenceDate: r[2],
 		})
 	}
 
