@@ -14,7 +14,7 @@ import (
 
 const REPO_OWNER = "taichi765"
 const REPO_NAME = "kokkimusume-wiki-automation"
-const CHARA_CSV_PATH = "data/chara.csv"
+const CHARA_CSV_PATH = "data/charas.csv"
 
 func updateCsv(chara common.CharacterData, appId, installationId int64) error {
 	client, err := newClient(appId, installationId)
