@@ -12,10 +12,31 @@ import (
 	"github.com/disgoorg/disgo"
 	"github.com/disgoorg/disgo/bot"
 	"github.com/disgoorg/disgo/discord"
-	"github.com/disgoorg/disgo/events"
-	"github.com/disgoorg/disgo/gateway"
+	"github.com/disgoorg/disgo/handler"
+	"github.com/disgoorg/snowflake/v2"
 	"github.com/joho/godotenv"
 )
+
+var commands = []discord.ApplicationCommandCreate{
+	discord.SlashCommandCreate{
+		Name:        "new",
+		Description: "append new character to CSV file on github",
+		DescriptionLocalizations: map[discord.Locale]string{
+			discord.LocaleJapanese: "新しい国旗娘をGitHub上のCSVファイルに追加する",
+		},
+		IntegrationTypes: []discord.ApplicationIntegrationType{
+			discord.ApplicationIntegrationTypeGuildInstall,
+		},
+		Contexts: []discord.InteractionContextType{
+			discord.InteractionContextTypeGuild,
+		},
+	},
+}
+
+type App struct {
+	envVars *EnvVars
+	client  *bot.Client
+}
 
 type EnvVars struct {
 	githubAppId          int64
@@ -25,6 +46,7 @@ type EnvVars struct {
 	discordPublicKey     string
 }
 
+// 環境変数または.envから[EnvVars]を読み込む
 func loadEnvVars() (*EnvVars, error) {
 	dotEnvLoaded := false
 	load := func(name string) (string, error) {
@@ -86,47 +108,52 @@ func loadEnvVars() (*EnvVars, error) {
 }
 
 func main() {
+	os.Exit(runMain())
+}
+
+func runMain() int {
 	slog.Info("loading env vars")
 	envVars, err := loadEnvVars()
 	if err != nil {
 		slog.Error("failed to load env vars", slog.Any("err", err))
+		return 1
 	}
 	slog.Info("successfully loaded env vars")
 
-	client, err := disgo.New(envVars.discordToken,
-		bot.WithGatewayConfigOpts(
-			gateway.WithIntents(
-				gateway.IntentGuildMembers,
-				gateway.IntentMessageContent,
-			),
-		),
-		bot.WithEventListenerFunc(commandListener))
-	if err != nil {
-		slog.Error("error while building disgo", slog.Any("err", err))
-		return
+	app := App{
+		envVars: envVars,
+		client:  nil,
 	}
 
+	h := handler.New()
+	h.SlashCommand("/new", newCharaModalSlashCommand)
+	h.Modal("/modals/new", app.onNewCharaModalSubmitted)
+
+	tok := envVars.discordToken
+	client, err := disgo.New(tok,
+		bot.WithDefaultGateway(),
+		bot.WithEventListeners(h),
+	)
+	if err != nil {
+		slog.Error("error while building disgo", slog.Any("err", err))
+		return 1
+	}
 	defer client.Close(context.TODO())
+	app.client = client
+
+	if err := handler.SyncCommands(client, commands, []snowflake.ID{snowflake.GetEnv("DEV_DISCORD_GUILD_ID")}); err != nil {
+		slog.Error("failed to register commands", slog.Any("err", err))
+	}
 
 	slog.Info("opening gateway between discord")
 	if err = client.OpenGateway(context.TODO()); err != nil {
 		slog.Error("errors while connecting to gateway", slog.Any("err", err))
-		return
+		return 1
 	}
 
 	slog.Info("example is now running. Press CTRL-C to exit.")
 	s := make(chan os.Signal, 1)
 	signal.Notify(s, syscall.SIGINT, syscall.SIGTERM, os.Interrupt)
 	<-s
-}
-
-func commandListener(event *events.ApplicationCommandInteractionCreate) {
-	data := event.SlashCommandInteractionData()
-	switch data.CommandName() {
-	case "hello":
-		err := event.CreateMessage(discord.NewMessageCreate().WithContentf("Hello, %v!", data.String("name")))
-		if err != nil {
-			slog.Error("failed to send message", slog.Any("err", err))
-		}
-	}
+	return 0
 }
