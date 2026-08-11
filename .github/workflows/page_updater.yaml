@@ -6,6 +6,7 @@ on:
       - ./page-updater/*
       - ./data/*
       - ./common/*
+      - ./.github/workflows/*
   workflow_dispatch:
 
 jobs:
