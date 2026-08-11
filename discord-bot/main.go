@@ -52,6 +52,7 @@ type App struct {
 type EnvVars struct {
 	githubAppId          int64
 	githubInstallationId int64
+	githubPrivateKey     []byte
 	discordAppId         string
 	discordToken         string
 	discordPublicKey     string
@@ -108,6 +109,10 @@ func loadEnvVars() (*EnvVars, error) {
 	if err != nil {
 		return nil, err
 	}
+	githubPrivateKey, err := load("GITHUB_PRIVATE_KEY")
+	if err != nil {
+		return nil, err
+	}
 
 	return &EnvVars{
 		discordToken:         discordToken,
@@ -115,6 +120,7 @@ func loadEnvVars() (*EnvVars, error) {
 		discordPublicKey:     discordPublicKey,
 		githubAppId:          githubAppId,
 		githubInstallationId: githubInstallationId,
+		githubPrivateKey:     []byte(githubPrivateKey),
 	}, nil
 }
 

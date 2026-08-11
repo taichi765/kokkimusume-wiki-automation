@@ -8,6 +8,27 @@ resource "azurerm_log_analytics_workspace" "kokkimusume-discordbot" {
   retention_in_days   = 30
 }
 
+resource "azurerm_key_vault" "kokkimusume-discordbot" {
+  name = "kokkimusume-discordbot-kv"
+  location = azurerm_resource_group.kokkimusume-discordbot.location
+  resource_group_name = azurerm_resource_group.kokkimusume-discordbot.name
+  tenant_id = data.azurerm_client_config.current.tenant_id
+
+  sku_name = "standard"
+}
+
+resource "azurerm_key_vault_secret" "discord-token" {
+  name = "discord-token"
+  value = var.discord-token
+  key_vault_id = azurerm_key_vault.kokkimusume-discordbot.id
+}
+
+resource "azurerm_key_vault_secret" "github-private-key" {
+  name = "github-private-key"
+  value = var.github-private-key
+  key_vault_id = azurerm_key_vault.kokkimusume-discordbot.id
+}
+
 resource "azurerm_container_app_environment" "kokkimusume-discordbot" {
   name                       = "kokkimusume-discordbot-env"
   location                   = azurerm_resource_group.kokkimusume-discordbot.location
@@ -42,6 +63,12 @@ resource "azurerm_container_app" "kokkimusume-discordbot" {
     }
   }
 
+  secret {
+    name = "discord-token"
+    key_vault_secret_id = azurerm_key_vault_secret.discord-token.id
+    identity = "system"
+  }
+
   template {
     min_replicas = 1
     max_replicas = 1
@@ -51,6 +78,36 @@ resource "azurerm_container_app" "kokkimusume-discordbot" {
       image  =  "${azurerm_container_registry.acr.login_server}/discordbot:${var.commit_sha256}"
       cpu    = 0.25
       memory = "0.5Gi"
+
+      env {
+        name = "GITHUB_APP_ID"
+        value = var.github-app-id
+      }
+
+      env {
+        name = "GITHUB_INSTALLATION_ID"
+        value = var.github-installation-id
+      }
+
+      env {
+        name = "GITHUB_PRIVATE_KEY"
+        secret_name = "github-private-key"
+      }
+
+      env {
+        name = "DISCORD_PUBLIC_KEY"
+        value = var.discord-public-key
+      }
+
+      env {
+        name = "DISCORD_APP_ID"
+        value = var.discord-app-id
+      }
+
+      env {
+        name = "DISCORD_TOKEN"
+        secret_name = "discord-token"
+      }
     }
   }
 }
@@ -58,5 +115,11 @@ resource "azurerm_container_app" "kokkimusume-discordbot" {
 resource "azurerm_role_assignment" "acr_pull" {
   scope = azurerm_container_registry.acr.id
   role_definition_name = "AcrPull"
+  principal_id = azurerm_container_app.kokkimusume-discordbot.identity[0].principal_id
+}
+
+resource "azurerm_role_assignment" "key_vault" {
+  scope = azurerm_key_vault.kokkimusume-discordbot.id
+  role_definition_name = "Key Vault Secrets User"
   principal_id = azurerm_container_app.kokkimusume-discordbot.identity[0].principal_id
 }

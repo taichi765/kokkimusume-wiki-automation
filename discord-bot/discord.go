@@ -111,7 +111,7 @@ func validateDateInput(val string) error {
 }
 
 func (a *App) handleUpdateCsv(chara common.CharacterData, createFollowupMessage func(discord.MessageCreate, ...rest.RequestOpt) (*discord.Message, error)) {
-	if err := updateCsv(chara, a.envVars.githubAppId, a.envVars.githubInstallationId); err != nil {
+	if err := updateCsv(chara, a.envVars.githubAppId, a.envVars.githubInstallationId, a.envVars.githubPrivateKey); err != nil {
 		if _, err := createFollowupMessage(discord.NewMessageCreate().WithContentf("failed to update CSV file on GitHub: %v", err)); err != nil {
 			slog.Error("failed to send message", slog.Any("err", err))
 		}

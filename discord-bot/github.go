@@ -16,8 +16,8 @@ const REPO_OWNER = "taichi765"
 const REPO_NAME = "kokkimusume-wiki-automation"
 const CHARA_CSV_PATH = "data/charas.csv"
 
-func updateCsv(chara common.CharacterData, appId, installationId int64) error {
-	client, err := newClient(appId, installationId)
+func updateCsv(chara common.CharacterData, appId, installationId int64, privateKey []byte) error {
+	client, err := newClient(appId, installationId, privateKey)
 	if err != nil {
 		return err
 	}
@@ -57,8 +57,8 @@ func updateCsv(chara common.CharacterData, appId, installationId int64) error {
 	return nil
 }
 
-func newClient(appId, installationId int64) (*github.Client, error) {
-	itr, err := ghinstallation.NewKeyFromFile(http.DefaultTransport, appId, installationId, "./kokkimusume-wiki-automation.2026-08-10.private-key.pem")
+func newClient(appId, installationId int64, privateKey []byte) (*github.Client, error) {
+	itr, err := ghinstallation.New(http.DefaultTransport, appId, installationId, privateKey)
 	if err != nil {
 		return nil, fmt.Errorf("failed to create authenticated transport: %w", err)
 	}
