@@ -5,9 +5,44 @@ provider "azurerm" {
   }
 }
 
+provider "azuread" {
+  
+}
+
 resource "azurerm_resource_group" "kokkimusume-discordbot" {
   name     = "kokkimusume-discordbot-resources"
   location = "Japan East"
+}
+
+resource "azuread_application" "github-actions" {
+  display_name = "kokkimusume-discordbot-github-actions"
+}
+
+resource "azuread_service_principal" "github-actions" {
+  client_id = azuread_application.github-actions.client_id
+}
+
+resource "azuread_application_federated_identity_credential" "github-actions" {
+  application_id = azuread_application.github-actions.id
+  display_name = "kokkimusume-discordbot-github-actions-cred"
+  description = "Github Actions OIDC federation"
+  audiences = ["api://AzureADTokenExchange"]
+  issuer = "https://tokens.actions.githubusercontent.com"
+  subject = "repo:taichi765/kokkimusume-wiki-automation:ref:refs/heads/main"
+}
+
+resource "azurerm_role_assignment" "acr_push" {
+  scope = azurerm_container_registry.acr.id
+  role_definition_name = "AcrPush"
+  principal_id = azuread_service_principal.github-actions.object_id
+}
+
+resource "azurerm_container_registry" "acr" {
+  name = "kokkimusumeDiscordbotRegistry"
+  resource_group_name = azurerm_resource_group.kokkimusume-discordbot.name
+  location = azurerm_resource_group.kokkimusume-discordbot.location
+  sku = "Standard"
+  admin_enabled = false
 }
 
 resource "azurerm_log_analytics_workspace" "kokkimusume-discordbot" {
@@ -35,17 +70,25 @@ resource "azurerm_container_app" "kokkimusume-discordbot" {
   template {
     container {
       name   = "kokkimusume-discordbot-container"
-      image  = "kokkimusumediscordbot-a7g8a0bnajh6fghc.azurecr.io/kokkimusumediscordbot:v0.0.0"
+      image  =  "mcr.microsoft.com/k8se/quickstart:latest"#"kokkimusumediscordbot-a7g8a0bnajh6fghc.azurecr.io/kokkimusumediscordbot:v0.0.0"
       cpu    = 0.25
       memory = "0.5Gi"
     }
   }
 }
 
-resource "azurerm_container_registry" "kokkimusume-discordbot" {
-  name = "kokkimusumeDiscordbotRegistry"
-  resource_group_name = azurerm_resource_group.kokkimusume-discordbot.name
-  location = azurerm_resource_group.kokkimusume-discordbot.location
-  sku = "Standard"
-  admin_enabled = false
+data "azurerm_client_config" "current" {
+  
+}
+
+output "azure_client_id" {
+  value = azuread_application.github-actions.client_id
+}
+
+output "azure_tenant_id"{
+  value = data.azurerm_client_config.current.tenant_id
+}
+
+output "azure_subscription_id" {
+  value = data.azurerm_client_config.current.subscription_id
 }
