@@ -1,0 +1,22 @@
+name: Update Pages
+on:
+  push:
+    branches: main
+    paths:
+      - ./page-updater/*
+      - ./data/*
+      - ./common/*
+  workflow_dispatch:
+
+jobs:
+  generate_page:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-go@v7
+        with:
+          go-version-file: ./go.work
+      - run: cd ./page-updater/&&go run .
+        env:
+          WIKIWIKI_PASSWORD: ${{ secrets.WIKIWIKI_PASSWORD }}
+    
