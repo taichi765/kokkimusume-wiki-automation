@@ -161,11 +161,21 @@ func runMain() int {
 	defer client.Close(context.TODO())
 	app.client = client
 
-	if err := handler.SyncCommands(client, commands, []snowflake.ID{snowflake.GetEnv("DEV_DISCORD_GUILD_ID")}); err != nil {
+	devGuildId, ok := os.LookupEnv("DEV_DISCORD_GUILD_ID")
+	guildIds := []snowflake.ID{}
+	if ok {
+		id, err := snowflake.Parse(devGuildId)
+		if err != nil {
+			slog.Error("can't parse DEV_DISCORD_GUILD_ID", slog.Any("err", err))
+			return 1
+		}
+		guildIds = append(guildIds, id)
+	}
+	if err := handler.SyncCommands(client, commands, guildIds); err != nil {
 		slog.Error("failed to register commands", slog.Any("err", err))
 	}
 
-	slog.Info("opening gateway between discord")
+	slog.Info("opening HTTP server")
 	if err = client.OpenHTTPServer(); err != nil {
 		slog.Error("failed to open HTTP server", slog.Any("err", err))
 		return 1
