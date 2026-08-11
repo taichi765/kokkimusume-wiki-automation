@@ -32,16 +32,6 @@ var commands = []discord.ApplicationCommandCreate{
 			discord.InteractionContextTypeGuild,
 		},
 	},
-	discord.SlashCommandCreate{
-		Name:        "dummy",
-		Description: "dummy slash command",
-		IntegrationTypes: []discord.ApplicationIntegrationType{
-			discord.ApplicationIntegrationTypeGuildInstall,
-		},
-		Contexts: []discord.InteractionContextType{
-			discord.InteractionContextTypeGuild,
-		},
-	},
 }
 
 type App struct {
