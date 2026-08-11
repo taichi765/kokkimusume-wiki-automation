@@ -32,8 +32,10 @@ resource "azurerm_container_app" "kokkimusume-discordbot" {
   }
 
   ingress {
-    target_port = 80
+    target_port = 8080
     external_enabled = true
+    allow_insecure_connections = false
+   
     traffic_weight {
       percentage = 100
       latest_revision = true

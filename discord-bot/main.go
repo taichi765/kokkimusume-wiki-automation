@@ -133,8 +133,8 @@ func runMain() int {
 	tok := envVars.discordToken
 	client, err := disgo.New(tok,
 		bot.WithHTTPServerConfigOpts(app.envVars.discordPublicKey,
-			httpserver.WithURL("/interactions/callback"),
-			httpserver.WithAddress(":80"),
+			httpserver.WithURL("/interactions/"),
+			httpserver.WithAddress(":8080"),
 		),
 		bot.WithEventListeners(h),
 	)

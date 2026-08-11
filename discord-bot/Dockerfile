@@ -9,4 +9,6 @@ FROM alpine:latest
 
 COPY --from=builder /build/discord-bot /opt/discord-bot/discord-bot
 
+EXPOSE 8080
+
 ENTRYPOINT [ "/opt/discord-bot/discord-bot" ]
