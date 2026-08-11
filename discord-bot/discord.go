@@ -7,7 +7,7 @@ import (
 
 	"github.com/disgoorg/disgo/discord"
 	"github.com/disgoorg/disgo/handler"
-	"github.com/disgoorg/snowflake/v2"
+	"github.com/disgoorg/disgo/rest"
 	"github.com/taichi765/kokkimusume-wiki-automation/common"
 )
 
@@ -44,7 +44,7 @@ func newCharaModalSlashCommand(data discord.SlashCommandInteractionData, e *hand
 func (a *App) onNewCharaModalSubmitted(e *handler.ModalEvent) error {
 	slog.Debug("received modal event for /modals/new")
 
-	if err := e.DeferCreateMessage(true); err != nil {
+	if err := e.DeferCreateMessage(false); err != nil {
 		return err
 	}
 
@@ -69,7 +69,10 @@ func (a *App) onNewCharaModalSubmitted(e *handler.ModalEvent) error {
 	}
 
 	if err := validateDateInput(dateInput.Value); err != nil {
-		return e.CreateMessage(discord.NewMessageCreate().WithContentf("the value of date-input was invalid: %v", err))
+		_, err := e.CreateFollowupMessage(
+			discord.NewMessageCreate().WithContentf("the value of date-input was invalid: %v", err),
+		)
+		return err
 	}
 
 	chara := common.CharacterData{
@@ -77,7 +80,7 @@ func (a *App) onNewCharaModalSubmitted(e *handler.ModalEvent) error {
 		Area:                areaInput.Values[0],
 		FirstAppearenceDate: dateInput.Value,
 	}
-	go a.handleUpdateCsv(chara, e.Message.ChannelID)
+	go a.handleUpdateCsv(chara, e.CreateFollowupMessage)
 	return nil
 }
 
@@ -107,16 +110,15 @@ func validateDateInput(val string) error {
 	return nil
 }
 
-func (a *App) handleUpdateCsv(chara common.CharacterData, channelId snowflake.ID) {
+func (a *App) handleUpdateCsv(chara common.CharacterData, createFollowupMessage func(discord.MessageCreate, ...rest.RequestOpt) (*discord.Message, error)) {
 	if err := updateCsv(chara, a.envVars.githubAppId, a.envVars.githubInstallationId); err != nil {
-		_, err := a.client.Rest.CreateMessage(channelId, discord.NewMessageCreate().WithContentf("failed to update CSV file on GitHub: %v", err))
-		if err != nil {
+		if _, err := createFollowupMessage(discord.NewMessageCreate().WithContentf("failed to update CSV file on GitHub: %v", err)); err != nil {
 			slog.Error("failed to send message", slog.Any("err", err))
 		}
 		return
 	}
-	_, err := a.client.Rest.CreateMessage(channelId, discord.NewMessageCreate().WithContent("CSVファイルの更新に成功しました"))
-	if err != nil {
+
+	if _, err := createFollowupMessage(discord.NewMessageCreate().WithContent("CSVファイルの更新に成功しました")); err != nil {
 		slog.Error("failed to send message", slog.Any("err", err))
 	}
 }
