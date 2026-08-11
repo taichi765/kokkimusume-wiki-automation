@@ -3,9 +3,8 @@ on:
   push:
     branches: master
     paths:
-      - main.tf
-      - .terraform.lock.hcl
       - go.work*
+      - terraform/**
       - discord-bot/**
       - common/**
   workflow_dispatch:
