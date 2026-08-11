@@ -1,0 +1,18 @@
+flowchart LR
+    %% Nodes
+        A("fab:fa-discord discord-bot")
+        subgraph GitHub
+            B("fab:fa-github charas.csv")
+            C("fab:fa-github page-updater")
+        end
+        D("WikiWiki")
+
+
+    %% Edge connections between nodes
+        A -- GitHub App経由で更新 --> B
+        B -- GitHub Actionsをトリガー --> C
+        C -- REST APIを叩く --> D
+
+    %% Individual node styling. Try the visual editor toolbar for easier styling!
+
+    %% You can add notes with two "%" signs in a row!
