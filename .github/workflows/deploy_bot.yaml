@@ -8,6 +8,7 @@ on:
       - go.work*
       - discord-bot/*
       - common/*
+      - .github/workflows/*
   workflow_dispatch:
 
 jobs:
