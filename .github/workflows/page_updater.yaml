@@ -3,10 +3,9 @@ on:
   push:
     branches: master
     paths:
-      - ./page-updater/*
-      - ./data/*
-      - ./common/*
-      - ./.github/workflows/*
+      - ./page-updater/**
+      - ./data/**
+      - ./common/**
   workflow_dispatch:
 
 jobs:
