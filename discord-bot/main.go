@@ -13,6 +13,7 @@ import (
 	"github.com/disgoorg/disgo/bot"
 	"github.com/disgoorg/disgo/discord"
 	"github.com/disgoorg/disgo/handler"
+	"github.com/disgoorg/disgo/httpserver"
 	"github.com/disgoorg/snowflake/v2"
 	"github.com/joho/godotenv"
 )
@@ -131,7 +132,10 @@ func runMain() int {
 
 	tok := envVars.discordToken
 	client, err := disgo.New(tok,
-		bot.WithDefaultGateway(),
+		bot.WithHTTPServerConfigOpts(app.envVars.discordPublicKey,
+			httpserver.WithURL("/interactions/callback"),
+			httpserver.WithAddress(":80"),
+		),
 		bot.WithEventListeners(h),
 	)
 	if err != nil {
@@ -146,8 +150,8 @@ func runMain() int {
 	}
 
 	slog.Info("opening gateway between discord")
-	if err = client.OpenGateway(context.TODO()); err != nil {
-		slog.Error("errors while connecting to gateway", slog.Any("err", err))
+	if err = client.OpenHTTPServer(); err != nil {
+		slog.Error("failed to open HTTP server", slog.Any("err", err))
 		return 1
 	}
 
