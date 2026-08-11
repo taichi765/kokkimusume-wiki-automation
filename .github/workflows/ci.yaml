@@ -7,7 +7,7 @@ on:
   workflow_call: 
 
 jobs:
-  ci:
+  go:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v7

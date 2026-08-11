@@ -48,7 +48,7 @@ resource "azurerm_container_app" "kokkimusume-discordbot" {
 
     container {
       name   = "kokkimusume-discordbot-container"
-      image  =  "${azurerm_container_registry.acr.login_server}/discordbot:latest"
+      image  =  "${azurerm_container_registry.acr.login_server}/discordbot:${var.commit_sha256}"
       cpu    = 0.25
       memory = "0.5Gi"
     }
