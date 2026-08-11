@@ -27,7 +27,7 @@ resource "azuread_application_federated_identity_credential" "github-actions" {
   display_name = "kokkimusume-discordbot-github-actions-cred"
   description = "Github Actions OIDC federation"
   audiences = ["api://AzureADTokenExchange"]
-  issuer = "https://tokens.actions.githubusercontent.com"
+  issuer = "https://token.actions.githubusercontent.com"
   subject = "repo:taichi765/kokkimusume-wiki-automation:ref:refs/heads/main"
 }
 
