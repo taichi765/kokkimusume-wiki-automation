@@ -32,7 +32,5 @@ jobs:
       - name: Build and push
         run: |
           TAG=kokkimusumediscordbotregistry.azurecr.io/discordbot:${{github.sha}}
-          docker build -t $TAG
+          docker build -t $TAG -f ./discord-bot/Dockerfile .
           docker push $TAG
-          
-  
