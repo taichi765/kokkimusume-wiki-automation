@@ -1,7 +1,7 @@
 name: Update Pages
 on:
   push:
-    branches: main
+    branches: master
     paths:
       - ./page-updater/*
       - ./data/*
