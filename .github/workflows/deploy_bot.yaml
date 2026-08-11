@@ -6,9 +6,8 @@ on:
       - main.tf
       - .terraform.lock.hcl
       - go.work*
-      - discord-bot/*
-      - common/*
-      - .github/workflows/*
+      - discord-bot/**
+      - common/**
   workflow_dispatch:
 
 permissions:

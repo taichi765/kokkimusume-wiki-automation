@@ -28,7 +28,7 @@ resource "azuread_application_federated_identity_credential" "github-actions" {
   description = "Github Actions OIDC federation"
   audiences = ["api://AzureADTokenExchange"]
   issuer = "https://token.actions.githubusercontent.com"
-  subject = "repo:taichi765/kokkimusume-wiki-automation:ref:refs/heads/main"
+  subject = "repo:taichi765@190380265/kokkimusume-wiki-automation@1328476148:ref:refs/heads/master"
 }
 
 resource "azurerm_role_assignment" "acr_push" {
