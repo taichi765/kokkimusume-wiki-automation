@@ -1,11 +1,13 @@
 name: terraform apply
 on:
-  push:
-    branches: master
+  # push:
+    # branches: master
 
 permissions:
   id-token: write
   contents: read
+
+
 
 jobs:
   terraform:
