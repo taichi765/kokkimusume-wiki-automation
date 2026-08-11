@@ -3,7 +3,7 @@ FROM golang:latest AS builder
 WORKDIR /build/
 COPY ./discord-bot/ ./discord-bot/
 COPY ./common ./common/
-RUN cd discord-bot&&go build
+RUN cd discord-bot&&CGO_ENABLED=0 go build
 
 FROM alpine:latest
 
