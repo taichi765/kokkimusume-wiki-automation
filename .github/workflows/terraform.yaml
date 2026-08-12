@@ -10,6 +10,9 @@ permissions:
 jobs:
   terraform:
     runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ./terraform
     steps:
       - uses: actions/checkout@v7
       - uses: hashicorp/setup-terraform@v4
@@ -18,10 +21,10 @@ jobs:
           client-id: ${{ vars.AZURE_APPLY_CLIENT_ID }}
           tenant-id: ${{ secrets.AZURE_TENANT_ID }}
           subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+      - name: Init terraform
+        run: terraform init
       - name: Apply terraform
         run: |
-          cd terraform
-          terraform init
           terraform apply -auto-approve -var="commit_sha256=${{github.sha}}"\
             -var="github-app-id=${{vars.GH_APP_ID}}"\
             -var="github-installation-id=${{vars.GH_INSTALLATION_ID}}"\
