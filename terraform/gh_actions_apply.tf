@@ -1,5 +1,6 @@
 resource "azuread_application" "gh-actions-apply" {
   display_name = "kokkimusume-discordbot-gh-actions-appply"
+  owners       = [azuread_service_principal.gh-actions-apply.object_id]
 }
 
 resource "azuread_service_principal" "gh-actions-apply" {
@@ -8,16 +9,16 @@ resource "azuread_service_principal" "gh-actions-apply" {
 
 resource "azuread_application_federated_identity_credential" "gh-actions-apply" {
   application_id = azuread_application.gh-actions-apply.id
-  display_name = "kokkimusume-discordbot-gh-actions-apply-cred"
-  description = "Github Actions OIDC federation for applying terraform"
-  audiences = ["api://AzureADTokenExchange"]
-  issuer = "https://token.actions.githubusercontent.com"
-  subject = "repo:taichi765@190380265/kokkimusume-wiki-automation@1328476148:ref:refs/heads/master"
+  display_name   = "kokkimusume-discordbot-gh-actions-apply-cred"
+  description    = "Github Actions OIDC federation for applying terraform"
+  audiences      = ["api://AzureADTokenExchange"]
+  issuer         = "https://token.actions.githubusercontent.com"
+  subject        = "repo:taichi765@190380265/kokkimusume-wiki-automation@1328476148:ref:refs/heads/master"
 }
 
 
 resource "azurerm_role_assignment" "gh-actions-apply" {
-  scope = azurerm_resource_group.kokkimusume-discordbot.id
+  scope                = azurerm_resource_group.kokkimusume-discordbot.id
   role_definition_name = "Contributor"
-  principal_id = azuread_service_principal.gh-actions-apply.object_id
+  principal_id         = azuread_service_principal.gh-actions-apply.object_id
 }

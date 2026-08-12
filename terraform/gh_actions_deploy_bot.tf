@@ -1,7 +1,8 @@
 
+
 resource "azuread_application" "github-actions" {
   display_name = "kokkimusume-discordbot-github-actions"
-  owners       = [azuread_application.gh-actions-apply.object_id]
+  owners       = ["e3af7ff0-0062-4648-80bd-739ce45e669c"]
 }
 
 resource "azuread_service_principal" "github-actions" {
