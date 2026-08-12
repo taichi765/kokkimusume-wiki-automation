@@ -25,10 +25,10 @@ jobs:
         run: terraform init
       - name: Apply terraform
         run: |
-          terraform apply -auto-approve -var="commit_sha256=${{github.sha}}"\
+          terraform apply -auto-approve -input=false -var="commit_sha256=${{github.sha}}"\
             -var="github-app-id=${{vars.GH_APP_ID}}"\
             -var="github-installation-id=${{vars.GH_INSTALLATION_ID}}"\
-            -var="discord-app-id=${{vars.DISCORD_APP_ID}}"
+            -var="discord-app-id=${{vars.DISCORD_APP_ID}}"\
             -var="discord-public-key=${{vars.DISCORD_PUBLIC_KEY}}"
         env:
           ARM_USE_OIDC: true
