@@ -18,16 +18,6 @@ resource "azurerm_key_vault" "kokkimusume-discordbot" {
   rbac_authorization_enabled = true
 }
 
-resource "azurerm_key_vault_secret" "discord-token" {
-  name         = "discord-token"
-  key_vault_id = azurerm_key_vault.kokkimusume-discordbot.id
-}
-
-resource "azurerm_key_vault_secret" "github-private-key" {
-  name         = "github-private-key"
-  key_vault_id = azurerm_key_vault.kokkimusume-discordbot.id
-}
-
 resource "azurerm_container_app_environment" "kokkimusume-discordbot" {
   name                       = "kokkimusume-discordbot-env"
   location                   = azurerm_resource_group.kokkimusume-discordbot.location
@@ -67,13 +57,13 @@ resource "azurerm_container_app" "kokkimusume-discordbot" {
 
   secret {
     name                = "discord-token"
-    key_vault_secret_id = azurerm_key_vault_secret.discord-token.id
+    key_vault_secret_id = "${azurerm_key_vault.kokkimusume-discordbot.vault_uri}secrets/discord-token"
     identity            = azurerm_user_assigned_identity.kokkimusume-discordbot.id
   }
 
   secret {
     name                = "github-private-key"
-    key_vault_secret_id = azurerm_key_vault_secret.github-private-key.id
+    key_vault_secret_id = "${azurerm_key_vault.kokkimusume-discordbot.vault_uri}secrets/github-private-key"
     identity            = azurerm_user_assigned_identity.kokkimusume-discordbot.id
   }
 
