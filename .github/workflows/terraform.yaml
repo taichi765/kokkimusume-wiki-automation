@@ -30,3 +30,5 @@ jobs:
             -var="github-installation-id=${{vars.GH_INSTALLATION_ID}}"\
             -var="discord-app-id=${{vars.DISCORD_APP_ID}}"
             -var="discord-public-key=${{vars.DISCORD_PUBLIC_KEY}}"
+        env:
+          ARM_USE_OIDC: true

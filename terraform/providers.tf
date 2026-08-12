@@ -1,6 +1,5 @@
 terraform {
   backend "azurerm" {
-    use_oidc             = true
     use_azuread_auth     = true
     storage_account_name = "kdbaccount"
     container_name       = "tfstate-storage-container"
