@@ -1,6 +1,12 @@
+
+
+resource "azurerm_resource_group" "boot" {
+  name     = "kokkimusume-discordbot-boot-resources"
+  location = "Japan East"
+}
+
 resource "azuread_application" "gh-actions-apply" {
   display_name = "kokkimusume-discordbot-gh-actions-appply"
-  owners       = [azuread_service_principal.gh-actions-apply.object_id]
 }
 
 resource "azuread_service_principal" "gh-actions-apply" {
@@ -16,9 +22,19 @@ resource "azuread_application_federated_identity_credential" "gh-actions-apply" 
   subject        = "repo:taichi765@190380265/kokkimusume-wiki-automation@1328476148:ref:refs/heads/master"
 }
 
-
-resource "azurerm_role_assignment" "gh-actions-apply" {
-  scope                = azurerm_resource_group.kokkimusume-discordbot.id
+resource "azurerm_role_assignment" "contributor" {
+  scope                = azurerm_resource_group.app.id
   role_definition_name = "Contributor"
   principal_id         = azuread_service_principal.gh-actions-apply.object_id
+}
+
+resource "azurerm_role_assignment" "storage" {
+  scope                = azurerm_resource_group.app.id
+  role_definition_name = "AcrPull"
+  principal_id         = azuread_service_principal.gh-actions-apply.object_id
+}
+
+resource "azurerm_resource_group" "app" {
+  name     = "kokkimusume-discordbot-resources"
+  location = "Japan East"
 }

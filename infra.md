@@ -1,0 +1,4 @@
+# インフラの構成について
+まず最初にterraform/bootstrap/init_azurerm_backend.shを実行して.tfstateを保存するためのAzure Storage Account等を作る。
+次にterraform/bootstrap/を管理者ロールを持った人がapplyする。
+bootstrapではGitHub Actionsからリソースを作成・管理するためのEntraID ApplicationやService Principalを作るので、bootstrapの後はCI/CDでapplyしていくことになる。

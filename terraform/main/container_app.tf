@@ -2,16 +2,16 @@
 
 resource "azurerm_log_analytics_workspace" "kokkimusume-discordbot" {
   name                = "kokkimusume-discordbot-logs"
-  location            = azurerm_resource_group.kokkimusume-discordbot.location
-  resource_group_name = azurerm_resource_group.kokkimusume-discordbot.name
+  location            = data.azurerm_resource_group.app.location
+  resource_group_name = data.azurerm_resource_group.app.name
   sku                 = "PerGB2018"
   retention_in_days   = 30
 }
 
 resource "azurerm_key_vault" "kokkimusume-discordbot" {
   name                = "discordbot-key-vault"
-  location            = azurerm_resource_group.kokkimusume-discordbot.location
-  resource_group_name = azurerm_resource_group.kokkimusume-discordbot.name
+  location            = data.azurerm_resource_group.app.location
+  resource_group_name = data.azurerm_resource_group.app.name
   tenant_id           = data.azurerm_client_config.current.tenant_id
 
   sku_name                   = "standard"
@@ -20,8 +20,8 @@ resource "azurerm_key_vault" "kokkimusume-discordbot" {
 
 resource "azurerm_container_app_environment" "kokkimusume-discordbot" {
   name                       = "kokkimusume-discordbot-env"
-  location                   = azurerm_resource_group.kokkimusume-discordbot.location
-  resource_group_name        = azurerm_resource_group.kokkimusume-discordbot.name
+  location                   = data.azurerm_resource_group.app.location
+  resource_group_name        = data.azurerm_resource_group.app.name
   log_analytics_workspace_id = azurerm_log_analytics_workspace.kokkimusume-discordbot.id
   logs_destination           = "log-analytics"
 }
@@ -29,7 +29,7 @@ resource "azurerm_container_app_environment" "kokkimusume-discordbot" {
 resource "azurerm_container_app" "kokkimusume-discordbot" {
   name                         = "kokkimusume-discordbot-app"
   container_app_environment_id = azurerm_container_app_environment.kokkimusume-discordbot.id
-  resource_group_name          = azurerm_resource_group.kokkimusume-discordbot.name
+  resource_group_name          = data.azurerm_resource_group.app.name
   revision_mode                = "Single"
 
   depends_on = [azurerm_role_assignment.acr_pull, azurerm_role_assignment.key_vault]
@@ -112,8 +112,8 @@ resource "azurerm_container_app" "kokkimusume-discordbot" {
 
 resource "azurerm_user_assigned_identity" "kokkimusume-discordbot" {
   name                = "kokkimusume-discortbot-identity"
-  location            = azurerm_resource_group.kokkimusume-discordbot.location
-  resource_group_name = azurerm_resource_group.kokkimusume-discordbot.name
+  location            = data.azurerm_resource_group.app.location
+  resource_group_name = data.azurerm_resource_group.app.name
 }
 
 resource "azurerm_role_assignment" "acr_pull" {
