@@ -10,15 +10,7 @@ variable "github-installation-id" {
   type = number
 }
 
-variable "github-private-key" {
-  type = string
-}
-
 variable "discord-app-id" {
-  type = string
-}
-
-variable "discord-token" {
   type = string
 }
 

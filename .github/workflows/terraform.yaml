@@ -1,13 +1,11 @@
 name: terraform apply
 on:
-  # push:
-    # branches: master
+  push:
+    branches: master
 
 permissions:
   id-token: write
   contents: read
-
-
 
 jobs:
   terraform:
@@ -21,4 +19,11 @@ jobs:
           tenant-id: ${{ secrets.AZURE_TENANT_ID }}
           subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
       - name: Apply terraform
-        run: cd terraform&&terraform init&&terraform apply -auto-approve -var="commit_sha256=${{github.sha}}"
+        run: |
+          cd terraform
+          terraform init
+          terraform apply -auto-approve -var="commit_sha256=${{github.sha}}"\
+            -var="github-app-id=${{vars.GH_APP_ID}}"\
+            -var="github-installation-id=${{vars.GH_INSTALLATION_ID}}"\
+            -var="discord-app-id=${{vars.DISCORD_APP_ID}}"
+            -var="discord-public-key=${{vars.DISCORD_PUBLIC_KEY}}"
