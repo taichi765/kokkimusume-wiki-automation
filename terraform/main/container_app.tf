@@ -7,7 +7,7 @@ resource "azurerm_log_analytics_workspace" "app" {
 }
 
 resource "azurerm_key_vault" "app" {
-  name                = "key-vault"
+  name                = "kdb-key-vault"
   location            = data.azurerm_resource_group.app.location
   resource_group_name = data.azurerm_resource_group.app.name
   tenant_id           = data.azurerm_client_config.current.tenant_id

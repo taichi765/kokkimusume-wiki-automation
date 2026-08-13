@@ -45,6 +45,12 @@ resource "azurerm_role_assignment" "storage" {
   principal_id         = azuread_service_principal.gh-actions-apply.object_id
 }
 
+resource "azurerm_role_assignment" "role_admin" {
+  scope                = azurerm_resource_group.app.id
+  role_definition_name = "User Access Administrator"
+  principal_id         = azuread_service_principal.gh-actions-apply.object_id
+}
+
 resource "azuread_app_role_assignment" "readwrite" {
   app_role_id         = azuread_service_principal.msgraph.app_role_ids["Application.ReadWrite.OwnedBy"]
   principal_object_id = azuread_service_principal.gh-actions-apply.object_id
