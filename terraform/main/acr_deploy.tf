@@ -1,6 +1,17 @@
+data "terraform_remote_state" "boot" {
+  backend = "azurerm"
+
+  config = {
+    use_azuread_auth     = true
+    storage_account_name = "kdbaccount"
+    container_name       = "tfstate-storage-container"
+    key                  = "boot.tfstate"
+  }
+}
+
 resource "azuread_application" "acr-deploy" {
   display_name = "kokkimusume-discordbot-acr-deploy"
-  owners       = ["f09650f5-9059-46d8-910f-619a2738737a"]
+  owners       = [data.terraform_remote_state.boot.outputs.service_principal_id]
 }
 
 resource "azuread_service_principal" "acr-deploy" {

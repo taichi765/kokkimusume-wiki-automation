@@ -51,7 +51,6 @@ resource "azuread_app_role_assignment" "readwrite" {
   resource_object_id  = azuread_service_principal.msgraph.object_id
 }
 
-
 resource "azurerm_resource_group" "app" {
   name     = "kokkimusume-discordbot-resources"
   location = "Japan East"
