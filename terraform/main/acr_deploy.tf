@@ -1,8 +1,6 @@
-
-
 resource "azuread_application" "acr-deploy" {
   display_name = "kokkimusume-discordbot-acr-deploy"
-  owners       = ["e3af7ff0-0062-4648-80bd-739ce45e669c"]
+  owners       = ["f09650f5-9059-46d8-910f-619a2738737a"]
 }
 
 resource "azuread_service_principal" "acr-deploy" {
