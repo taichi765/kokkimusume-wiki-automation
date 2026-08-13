@@ -2,10 +2,6 @@ data "azurerm_client_config" "current" {
 
 }
 
-output "azure_deploy_bot_client_id" {
-  value = azuread_application.github-actions.client_id
-}
-
 output "azure_tenant_id" {
   value = data.azurerm_client_config.current.tenant_id
 }
