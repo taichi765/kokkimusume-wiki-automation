@@ -15,6 +15,7 @@
           pkgs.go
           pkgs.azure-cli
           pkgs.terraform
+          pkgs.just
         ];
       };
   };
