@@ -28,9 +28,10 @@ resource "azurerm_role_assignment" "contributor" {
   principal_id         = azuread_service_principal.gh-actions-apply.object_id
 }
 
+
 resource "azurerm_role_assignment" "storage" {
   scope                = azurerm_resource_group.app.id
-  role_definition_name = "AcrPull"
+  role_definition_name = "Storage Blob Data Contributor"
   principal_id         = azuread_service_principal.gh-actions-apply.object_id
 }
 
