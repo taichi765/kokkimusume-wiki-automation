@@ -1,4 +1,7 @@
-
+data "azurerm_storage_account" "backend" {
+  resource_group_name = "kokkimusume-discordbot-tfstate-resources"
+  name                = "kdbaccount"
+}
 
 resource "azurerm_resource_group" "boot" {
   name     = "kokkimusume-discordbot-boot-resources"
@@ -30,7 +33,7 @@ resource "azurerm_role_assignment" "contributor" {
 
 
 resource "azurerm_role_assignment" "storage" {
-  scope                = azurerm_resource_group.app.id
+  scope                = data.azurerm_storage_account.backend.id
   role_definition_name = "Storage Blob Data Contributor"
   principal_id         = azuread_service_principal.gh-actions-apply.object_id
 }
