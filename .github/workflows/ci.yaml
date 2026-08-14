@@ -34,6 +34,7 @@ jobs:
       - uses: actions/setup-go@v7
         with:
           go-version-file: ./page-updater/go.mod
+          cache-dependency-path: ./page-updater/go.sum
       - name: Run tests
         run: go test
   
@@ -53,6 +54,7 @@ jobs:
       - uses: actions/setup-go@v7
         with:
             go-version-file: ./discord-bot/go.mod
+            cache-dependency-path: ./discord-bot/go.sum
       - name: Run tests
         run: go test
   
