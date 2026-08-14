@@ -1,39 +1,27 @@
 name: CI
 on:
-  push:
-    branches: master
   pull_request:
     branches: master
+  workflow_call:
+    outputs:
+      page_updater_success:
+        value: ${{ jobs.page_updater_check.result == 'success' }}
+      discord_bot_success:
+        value: ${{ jobs.discord_bot_check.result == 'success' }}
+      terraform_success:
+        value: ${{ jobs.terraform_check.result == 'success' }}
+      update_image:
+        description: "whether container image should be updated or not"
+        value: ${{ jobs.paths_filter.outputs.terraform_image_only || jobs.paths_filter.outputs.terraform_both }}
 
 jobs:
-  files_changed:
-    runs-on: ubuntu-latest
-    outputs:
-      page_updater: ${{ steps.filter.outputs.page_updater == 'true' || steps.filter.outputs.go_common == 'true' }}
-      discord_bot: ${{ steps.filter.outputs.discord-bot == 'true' || steps.filter.outputs.go_common == 'true' }}
-      terraform_image_only: ${{ steps.filter.outputs.infra == 'false' && (steps.filter.outputs.discord_bot == 'true' || steps.filter.outputs.go_common == 'true') }}  
-      terraform_infra_only: ${{ steps.filter.outputs.infra == 'true' && (steps.filter.outputs.discord_bot == 'false' && steps.filter.outputs.go_common == 'false') }}  
-      terraform_both: ${{ steps.filter.outputs.infra=='true' && (steps.filter.outputs.discord_bot == 'true' || steps.filter.outputs.go_common == 'true') }}
-    steps:
-      - uses: dorny/paths-filter@ceb8a2b8f2d89434be7ff52d3de7ec3738c5cc9d
-        id: filter
-        with:
-          filters: |
-            go_common:
-              - ./go.work
-              - ./go.sum
-              - ./common/**
-            page_updater:
-              - ./page-updater/**
-            discord_bot:
-              - ./discord-bot/**
-            infra:
-              - ./terraform/**
+  paths_filter:
+    uses: ./.github/workflows/paths_filter.yaml
 
   page_updater_check:
     runs-on: ubuntu-latest
-    needs: files_changed
-    if: ${{ needs.files_changed.outputs.page_updater }}
+    needs: paths_filter
+    if: ${{ needs.paths_filter.outputs.page_updater }}
     steps:
       - uses: actions/checkout@v7
         with:
@@ -50,8 +38,8 @@ jobs:
   
   discord_bot_check:
     runs-on: ubuntu-latest
-    needs: files_changed
-    if: ${{ needs.files_changed.outputs.discord_bot }}
+    needs: paths_filter
+    if: ${{ needs.paths_filter.outputs.discord_bot }}
     steps:
       - uses: actions/checkout@v7
         with:
@@ -68,8 +56,8 @@ jobs:
   
   terraform_check:
     runs-on: ubuntu-latest
-    needs: files_changed
-    if: ${{ needs.files_changed.outputs.terraform_both || needs.files_changed.outputs.terraform_image_only || needs.files_changed.outputs.terraform_infra_only }}
+    needs: paths_filter
+    if: ${{ needs.paths_filter.outputs.terraform_both || needs.paths_filter.outputs.terraform_image_only || needs.paths_filter.outputs.terraform_infra_only }}
     steps:
       - uses: actions/checkout@v7
         with:
@@ -85,21 +73,4 @@ jobs:
           cd terraform/main/
           terraform validate
           
-  deploy_image:
-    needs: discord_bot_check
-    if: ${{ github.event_name=='push' }}
-    uses: ./.github/workflows/deploy_image.yaml
-    with:
-      version: v0.0.0 #TODO: dummy
-
-  apply_terraform:
-    needs: [terraform_check,files_changed]
-    if: ${{ github.event_name=='push' }}
-    uses: ./.github/workflows/apply_terraform.yaml
-    with:
-      update_image: ${{ needs.files_changed.outputs.terraform_both || needs.files_changed.outputs.terraform_image_only }}
   
-  update_page:
-    needs: page_updater_check
-    if: ${{ github.event_name=='push' }}
-    uses: ./.github/workflows/update_page.yaml
