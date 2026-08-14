@@ -63,6 +63,11 @@ jobs:
     needs: paths-filter
     if: ${{ needs.paths-filter.outputs.terraform-both == 'true' || needs.paths-filter.outputs.terraform-image-only == 'true' || needs.paths-filter.outputs.terraform-infra-only == 'true' }}
     steps:
+      - name: debug
+        run: |
+          echo "terraform-both = ${{needs.paths-filter.outputs.terraform-both}}"
+          echo "terraform-image-only = ${{needs.paths-filter.outputs.terraform-image-only}}"
+          echo "terraform-infra-only = ${{needs.paths-filter.outputs.terraform-infra-only}}"
       - uses: actions/checkout@v7
         with:
           sparse-checkout: |
