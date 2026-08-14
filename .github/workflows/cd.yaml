@@ -29,3 +29,5 @@ jobs:
     needs: ci
     if: ${{ needs.ci.outputs.page-updater-success == 'true' }}
     uses: ./.github/workflows/update_page.yaml
+    secrets:
+      WIKIWIKI_PASSWORD: ${{ secrets.WIKIWIKI_PASSWORD }}

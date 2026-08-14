@@ -6,6 +6,9 @@ on:
       - ./data/**
   workflow_dispatch:
   workflow_call:
+    secrets:
+      WIKIWIKI_PASSWORD:
+        required: true
 
 jobs:
   update-page:
