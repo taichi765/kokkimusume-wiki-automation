@@ -4,7 +4,7 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
-	"log"
+	"log/slog"
 	"net/http"
 	"os"
 
@@ -14,45 +14,66 @@ import (
 const API_ENDPOINT_BASE = "https://api.wikiwiki.jp/kokkimusume"
 
 func main() {
+	os.Exit(runMain())
+}
+
+func runMain() int {
 	passwd, err := loadPassword()
 	if err != nil {
-		log.Fatalf("failed to load password: %v", err)
+		slog.Error("failed to load password", slog.Any("err", err))
+		return 1
 	}
 
 	charas, err := loadCharaData()
 	if err != nil {
-		log.Fatalf("failed to load character data: %v", err)
+		slog.Error("failed to load character data", slog.Any("err", err))
+		return 1
 	}
 
-	tok := getAuthToken(passwd)
-	fmt.Println("successfully got token")
+	tok, err := getAuthToken(passwd)
+	if err != nil {
+		slog.Error("failed to get token", slog.Any("err", err))
+	}
+	slog.Info("successfully got token")
 
 	c := &http.Client{}
 
-	charaListSrc := getPageContent(c, "キャラ一覧", tok)
-	fmt.Println("successfully fetched content for character list page")
+	charaListSrc, err := getPageContent(c, "キャラ一覧", tok)
+	if err != nil {
+		return 1
+	}
+	slog.Info("successfully fetched content for character list page")
 
-	menubarSrc := getPageContent(c, "MenuBar", tok)
-	fmt.Println("successfully fetched content for menu bar")
+	menubarSrc, err := getPageContent(c, "MenuBar", tok)
+	if err != nil {
+		return 1
+	}
+	slog.Info("successfully fetched content for menu bar")
 
 	newCharaListSrc, err := editCharaListPage(charaListSrc, charas)
 	if err != nil {
-		log.Fatal(err)
+		slog.Error("failed to generate chara list page", slog.Any("err", err))
+		return 1
 	}
 	newMenubarSrc, err := editMenuBar(menubarSrc, charas)
 	if err != nil {
-		log.Fatal(err)
+		slog.Error("failed to generate MenuBar", slog.Any("err", err))
+		return 1
 	}
 
 	if err := putPageContent(c, "キャラ一覧", newCharaListSrc, tok); err != nil {
-		log.Fatal(err)
+		slog.Error("failed to update chara list page", slog.Any("err", err))
+		return 1
 	}
-	fmt.Println("successfully updated character list page")
+	slog.Info("successfully updated character list page")
 
 	if err := putPageContent(c, "MenuBar", newMenubarSrc, tok); err != nil {
-		log.Fatal(err)
+		slog.Error("failed to update MenuBar", slog.Any("err", err))
+		return 1
 	}
-	fmt.Println("successfully updated menu bar")
+	slog.Info("successfully updated menu bar")
+
+	return 0
 }
 
 // 環境変数または.envからパスワードを取得する
@@ -75,37 +96,37 @@ func loadPassword() (string, error) {
 }
 
 // getAuthToken gets token from wikiwiki's REST API.
-func getAuthToken(passwd string) string {
+func getAuthToken(passwd string) (string, error) {
 	body, err := json.Marshal(AuthRequest{
 		Password: passwd,
 	})
 	if err != nil {
-		log.Fatal("failed to marshal auth request")
+		return "", fmt.Errorf("failed to marshal auth request: %w", err)
 	}
 
 	buf := bytes.NewBuffer(body)
 
 	res, err := http.Post(API_ENDPOINT_BASE+"/auth", "application/json", buf)
 	if err != nil {
-		log.Fatal("failed to send request")
+		return "", fmt.Errorf("failed to send request: %w", err)
 	}
 	defer res.Body.Close()
 
 	if res.StatusCode != http.StatusOK {
-		log.Fatal("something went wrong")
+		return "", fmt.Errorf("something went wrong with authentication")
 	}
 
 	var resJson AuthResponse
 	err = json.NewDecoder(res.Body).Decode(&resJson)
 	if err != nil {
-		log.Fatal("failed to decode response")
+		return "", fmt.Errorf("failed to decode response: %w", err)
 	}
 
-	return resJson.Token
+	return resJson.Token, nil
 }
 
 // Gets page content from WikiWiki's REST API.
-func getPageContent(c *http.Client, page string, tok string) string {
+func getPageContent(c *http.Client, page string, tok string) (string, error) {
 	endpoint := API_ENDPOINT_BASE + "/page/" + page
 	req, err := http.NewRequest(http.MethodGet, endpoint, nil)
 	if err != nil {
@@ -115,17 +136,17 @@ func getPageContent(c *http.Client, page string, tok string) string {
 
 	res, err := c.Do(req)
 	if err != nil {
-		log.Fatal("failed to get page content")
+		return "", fmt.Errorf("failed to get page content: %w", err)
 	}
 	defer res.Body.Close()
 
 	var resJson GetPageResponse
 	err = json.NewDecoder(res.Body).Decode(&resJson)
 	if err != nil {
-		log.Fatal("failed to decode response")
+		return "", fmt.Errorf("failed to decode response: %w", err)
 	}
 
-	return resJson.Source
+	return resJson.Source, nil
 }
 
 // Updates page content using WikiWiki's REST API.
