@@ -23,7 +23,7 @@ jobs:
     if: ${{ needs.ci.outputs.terraform-success == 'true' }}
     uses: ./.github/workflows/apply_terraform.yaml
     with:
-      update-image: ${{ needs.ci.outputs.update-image }}
+      update-image: ${{ needs.ci.outputs.update-image == 'true' }}
   
   update-page:
     needs: ci
