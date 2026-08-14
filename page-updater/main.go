@@ -117,7 +117,7 @@ func getAuthToken(passwd string) (string, error) {
 	defer res.Body.Close()
 
 	if res.StatusCode != http.StatusOK {
-		return "", fmt.Errorf("something went wrong with authentication")
+		return "", fmt.Errorf("something went wrong with authentication: statusCode = %v", res.StatusCode)
 	}
 
 	var resJson AuthResponse
