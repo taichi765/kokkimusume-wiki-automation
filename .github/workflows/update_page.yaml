@@ -26,4 +26,3 @@ jobs:
       - run: go run .
         env:
           WIKIWIKI_PASSWORD: ${{ secrets.WIKIWIKI_PASSWORD }}
-    
