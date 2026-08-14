@@ -9,7 +9,7 @@ import (
 	"github.com/taichi765/kokkimusume-wiki-automation/common"
 )
 
-func editCharaListPage(old string, charas []common.CharacterData) (string, error) {
+func generateCharaListPage(old string, charas []common.CharacterData) (string, error) {
 	beforeStart, afterEnd, err := splitLinesToEdit(old)
 	if err != nil {
 		return "", err
@@ -23,6 +23,7 @@ func editCharaListPage(old string, charas []common.CharacterData) (string, error
 	return beforeStart + generated + afterEnd, nil
 }
 
+// Part of [generateCharaListPage].
 func generateCharaListPageContent(charas []common.CharacterData) (string, error) {
 	tmpl, err := template.New("table_item").Parse(
 		`|[[{{.Name}}]]|{{.Area}}|{{.FirstAppearenceDate}}|
@@ -45,7 +46,7 @@ func generateCharaListPageContent(charas []common.CharacterData) (string, error)
 	return b.String(), nil
 }
 
-func editMenuBar(old string, charas []common.CharacterData) (string, error) {
+func generateMenuBar(old string, charas []common.CharacterData) (string, error) {
 	beforeStart, afterEnd, err := splitLinesToEdit(old)
 	if err != nil {
 		return "", err
@@ -56,6 +57,7 @@ func editMenuBar(old string, charas []common.CharacterData) (string, error) {
 	return beforeStart + generated + afterEnd, nil
 }
 
+// Part of [generateMenuBar].
 func generateMenuBarContent(charas []common.CharacterData) string {
 	byArea := charasByArea(charas)
 	b := &strings.Builder{}

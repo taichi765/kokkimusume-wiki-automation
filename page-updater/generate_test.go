@@ -171,7 +171,7 @@ func TestSplitLinesToEditError(t *testing.T) {
 	}
 }
 
-func TestEditCharaListPage(t *testing.T) {
+func TestGenerateCharaListPage(t *testing.T) {
 	testCases := []struct {
 		desc   string
 		old    string
@@ -203,14 +203,14 @@ fugafuga
 	}
 	for _, tC := range testCases {
 		t.Run(tC.desc, func(t *testing.T) {
-			got, err := editCharaListPage(tC.old, tC.charas)
+			got, err := generateCharaListPage(tC.old, tC.charas)
 			require.Nil(t, err)
 			assert.Equal(t, tC.expect, got)
 		})
 	}
 }
 
-func TestEditMenuBar(t *testing.T) {
+func TestGenerateMenuBar(t *testing.T) {
 	testCases := []struct {
 		desc   string
 		old    string
@@ -246,7 +246,7 @@ fugafuga
 	}
 	for _, tC := range testCases {
 		t.Run(tC.desc, func(t *testing.T) {
-			got, err := editMenuBar(tC.old, tC.charas)
+			got, err := generateMenuBar(tC.old, tC.charas)
 			require.Nil(t, err, "should succeed")
 			assert.Equal(t, tC.expect, got)
 		})
