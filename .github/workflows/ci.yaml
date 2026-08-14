@@ -66,14 +66,14 @@ jobs:
           sparse-checkout: |
             terraform/
       - uses: hashicorp/setup-terraform@v4
-      - name: Init terraform
-        run: terraform init -backend=false
-      - name: Validate .tf files for bootstrap
+      - name: Init and validate .tf files for bootstrap
         run: |
           cd terraform/bootstrap/
+          terraform init -backend=false
           terraform validate
-      - name: Validate .tf files for main
+      - name: Init and validate .tf files for main
         run: |
           cd terraform/main/
+          terraform init -backend=false
           terraform validate
   
