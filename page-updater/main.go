@@ -38,6 +38,7 @@ func runMain() int {
 	tok, err := getAuthToken(passwd)
 	if err != nil {
 		slog.Error("failed to get token", slog.Any("err", err))
+		return 1
 	}
 	slog.Info("successfully got token")
 
@@ -125,6 +126,10 @@ func getAuthToken(passwd string) (string, error) {
 		return "", fmt.Errorf("failed to decode response: %w", err)
 	}
 
+	if resJson.Status != "ok" {
+		return "", fmt.Errorf("something went wrong while getting auth token: status = %s", resJson.Status)
+	}
+
 	return resJson.Token, nil
 }
 
@@ -144,6 +149,10 @@ func fetchPageContent(c *http.Client, page string, tok string) (string, error) {
 		return "", fmt.Errorf("failed to fetch page content: %w", err)
 	}
 	defer res.Body.Close()
+
+	if res.StatusCode != http.StatusOK {
+		return "", fmt.Errorf("something went wrong while fetching page content: statusCode = %v", res.StatusCode)
+	}
 
 	var resJson GetPageResponse
 	err = json.NewDecoder(res.Body).Decode(&resJson)
