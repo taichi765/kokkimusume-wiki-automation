@@ -21,7 +21,7 @@ jobs:
   page-updater-check:
     runs-on: ubuntu-latest
     needs: paths-filter
-    if: ${{ needs.paths-filter.outputs.page-updater }}
+    if: ${{ needs.paths-filter.outputs.page-updater == 'true' }}
     defaults:
       run:
         working-directory: page-updater/
@@ -40,7 +40,7 @@ jobs:
   discord-bot-check:
     runs-on: ubuntu-latest
     needs: paths-filter
-    if: ${{ needs.paths-filter.outputs.discord-bot }}
+    if: ${{ needs.paths-filter.outputs.discord-bot == 'true' }}
     defaults:
       run:
         working-directory: discord-bot/
@@ -59,7 +59,7 @@ jobs:
   terraform-check:
     runs-on: ubuntu-latest
     needs: paths-filter
-    if: ${{ needs.paths-filter.outputs.terraform-both || needs.paths-filter.outputs.terraform-image-only || needs.paths-filter.outputs.terraform-infra-only }}
+    if: ${{ needs.paths-filter.outputs.terraform-both == 'true' || needs.paths-filter.outputs.terraform-image-only || needs.paths-filter.outputs.terraform-infra-only == 'true' }}
     steps:
       - uses: actions/checkout@v7
         with:
