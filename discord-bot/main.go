@@ -34,6 +34,10 @@ var commands = []discord.ApplicationCommandCreate{
 	},
 }
 
+// set in ldFlags
+var version = "unknown"
+var commitHash = "unknown"
+
 type App struct {
 	envVars *EnvVars
 	client  *bot.Client
@@ -134,6 +138,8 @@ func runMain() int {
 
 	h := handler.New()
 	h.SlashCommand("/new", newCharaModalSlashCommand)
+	h.SlashCommand("/version", versionSlashCommand)
+	h.SlashCommand("/help", helpSlashCommand)
 	h.Modal("/modals/new", app.onNewCharaModalSubmitted)
 
 	tok := envVars.discordToken

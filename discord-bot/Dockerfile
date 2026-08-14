@@ -1,9 +1,13 @@
 FROM golang:latest AS builder
 
+ARG version
+ARG commitHash
+
 WORKDIR /build/
 COPY ./discord-bot/ ./discord-bot/
 COPY ./common ./common/
-RUN cd discord-bot&&CGO_ENABLED=0 go build
+RUN cd discord-bot&&CGO_ENABLED=0 go build -ldflags \
+    "-X main.version=${version} -X main.commitHash=${commitHash}"
 
 FROM alpine:latest
 

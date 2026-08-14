@@ -1,7 +1,15 @@
 name: Deploy Image
 on:
   workflow_dispatch:
+    inputs:
+      version:
+        type: string
+        description: "version of discord bot: vX.Y.Z"
   workflow_call:
+    inputs:
+      version:
+        type: string
+        description: "version of discord bot: vX.Y.Z"
 
 permissions:
   id-token: write
@@ -28,5 +36,6 @@ jobs:
       - name: Build and push
         run: |
           TAG=kokkimusumediscordbotregistry.azurecr.io/discordbot:${{github.sha}}
-          docker build -t $TAG -f ./discord-bot/Dockerfile .
+          docker build -t $TAG --build-arg version=${{inputs.version}}\
+            --build-arg commitHash=${{github.sha}} -f ./discord-bot/Dockerfile .
           docker push $TAG

@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"log/slog"
+	"strings"
 	"time"
 
 	"github.com/disgoorg/disgo/discord"
@@ -10,6 +11,42 @@ import (
 	"github.com/disgoorg/disgo/rest"
 	"github.com/taichi765/kokkimusume-wiki-automation/common"
 )
+
+type commandInfo struct {
+	name string
+	desc string
+}
+
+func helpSlashCommand(data discord.SlashCommandInteractionData, e *handler.CommandEvent) error {
+	infos := listAllCommands()
+
+	b := &strings.Builder{}
+	for _, info := range infos {
+		fmt.Fprintf(b, "%s: %s\n", info.name, info.desc)
+	}
+
+	return e.CreateMessage(discord.NewMessageCreate().WithContent(b.String()))
+}
+
+func listAllCommands() []commandInfo {
+	infos := make([]commandInfo, len(commands))
+	for i, cmd := range commands {
+		switch c := cmd.(type) {
+		case discord.SlashCommandCreate:
+			infos[i] = commandInfo{
+				name: c.Name,
+				desc: c.Description,
+			}
+		default:
+			panic("this type of command is not supported")
+		}
+	}
+	return infos
+}
+
+func versionSlashCommand(data discord.SlashCommandInteractionData, e *handler.CommandEvent) error {
+	return e.CreateMessage(discord.NewMessageCreate().WithContentf("version: %s\ncommit hash: %s", version, commitHash))
+}
 
 // /new
 func newCharaModalSlashCommand(data discord.SlashCommandInteractionData, e *handler.CommandEvent) error {
@@ -21,7 +58,6 @@ func newCharaModalSlashCommand(data discord.SlashCommandInteractionData, e *hand
 	for i, a := range common.ValidAreas {
 		areaOptions[i] = discord.NewStringSelectMenuOption(a, a)
 	}
-	fmt.Println(areaOptions)
 
 	return e.Modal(
 		discord.NewModalCreate("/modals/new", "新しい国旗娘を追加",
