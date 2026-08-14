@@ -4,14 +4,97 @@ on:
     branches: master
   pull_request:
     branches: master
-  workflow_call: 
 
 jobs:
-  go:
+  files_changed:
     runs-on: ubuntu-latest
+    outputs:
+      page_updater: ${{ steps.filter.outputs.page_updater == 'true' || steps.filter.outputs.go_common == 'true' }}
+      discord_bot: ${{ steps.filter.outputs.discord-bot == 'true' || steps.filter.outputs.go_common == 'true' }}
+      terraform_image_only: ${{ steps.filter.outputs.infra == 'false' && (steps.filter.outputs.discord_bot == 'true' || steps.filter.outputs.go_common == 'true') }}  
+      terraform_infra_only: ${{ steps.filter.outputs.infra == 'true' && (steps.filter.outputs.discord_bot == 'false' && steps.filter.outputs.go_common == 'false') }}  
+      terraform_both: ${{ steps.filter.outputs.infra=='true' && (steps.filter.outputs.discord_bot == 'true' || steps.filter.outputs.go_common == 'true') }}
+    steps:
+      - uses: dorny/paths-filter@ceb8a2b8f2d89434be7ff52d3de7ec3738c5cc9d
+        id: filter
+        with:
+          filters: |
+            go_common:
+              - ./go.work
+              - ./go.sum
+              - ./common/**
+            page_updater:
+              - ./page-updater/**
+            discord_bot:
+              - ./discord-bot/**
+            infra:
+              - ./terraform/**
+
+  page_updater_check:
+    runs-on: ubuntu-latest
+    needs: files_changed
+    if: ${{ needs.files_changed.outputs.page_updater }}
     steps:
       - uses: actions/checkout@v7
+        with:
+          sparse-checkout: |
+            go.work
+            go.sum
+            common/**
+            page-updater/**
       - uses: actions/setup-go@v7
         with:
           go-version-file: ./go.work
-      - run: go test ./page-updater/ ./discord-bot/
+      - name: Run tests
+        run: go test ./page-updater
+  
+  discord_bot_check:
+    runs-on: ubuntu-latest
+    needs: files_changed
+    if: ${{ needs.files_changed.outputs.discord_bot }}
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          sparse-checkout: |
+            go.work
+            go.sum
+            discord_bot/**
+            common/**
+      - uses: actions/setup-go@v7
+        with:
+            go-version-file: ./go.work
+      - name: Run tests
+        run: go test ./discord-bot
+  
+  terraform_check:
+    runs-on: ubuntu-latest
+    needs: files_changed
+    if: ${{ needs.files_changed.outputs.terraform_both || needs.files_changed.outputs.terraform_image_only || needs.files_changed.outputs.terraform_infra_only }}
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          sparse-checkout: |
+            terraform/**
+      - uses: hashicorp/setup-terraform@v4
+      - name: Validate .tf files for bootstrap
+        run: |
+          cd terraform/bootstrap/
+          terraform validate
+      - name: Validate .tf files for main
+        run: |
+          cd terraform/main/
+          terraform validate
+          
+  deploy_image:
+    needs: discord_bot_check
+    uses: ./.github/workflows/deploy_image.yaml
+
+  apply_terraform:
+    needs: [terraform_check,files_changed]
+    uses: ./.github/workflows/apply_terraform.yaml
+    with:
+      update_image: ${{ needs.files_changed.outputs.terraform_both || needs.files_changed.outputs.terraform_image_only }}
+  
+  update_page:
+    needs: page_updater_check
+    uses: ./.github/workflows/update_page.yaml

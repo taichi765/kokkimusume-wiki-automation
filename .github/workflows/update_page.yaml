@@ -3,16 +3,22 @@ on:
   push:
     branches: master
     paths:
-      - ./page-updater/**
       - ./data/**
-      - ./common/**
   workflow_dispatch:
+  workflow_call:
 
 jobs:
   generate_page:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v7
+        with:
+          sparse-checkout: |
+            common/**
+            page-updater/**
+            data/**
+            go.work
+            go.sum
       - uses: actions/setup-go@v7
         with:
           go-version-file: ./go.work

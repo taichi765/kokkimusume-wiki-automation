@@ -1,7 +1,17 @@
 name: terraform apply
 on:
-  push:
-    branches: master
+  workflow_call:
+    inputs:
+      update_image:
+        type: boolean
+        default: true
+        description: "Whether to update container image or not"
+  workflow_dispatch:
+    inputs:
+      update_image:
+        type: boolean
+        default: true
+        description: "Whether to update container image or not"
 
 permissions:
   id-token: write
@@ -23,9 +33,17 @@ jobs:
           subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
       - name: Init terraform
         run: terraform init
+      - name: Get image tag
+        id: image_tag
+        run:
+          if [ "${{inputs.update_image}}" = "true" ]; then
+            echo "image_tag=${{github.sha}}" >> "$GITHUB_OUTPUT"
+          else
+            echo "image_tag=$(terraform output latest_image_tag)" >> "$GITHUB_OUTPUT"
+          fi
       - name: Apply terraform
         run: |
-          terraform apply -auto-approve -input=false -var="commit_sha256=${{github.sha}}"\
+          terraform apply -auto-approve -input=false -var="commit_sha256=${{steps.image_tag.outputs.image_tag}}"\
             -var="github-app-id=${{vars.GH_APP_ID}}"\
             -var="github-installation-id=${{vars.GH_INSTALLATION_ID}}"\
             -var="discord-app-id=${{vars.DISCORD_APP_ID}}"\
