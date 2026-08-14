@@ -23,6 +23,7 @@ jobs:
       terraform_infra_only: ${{ steps.filter.outputs.infra == 'true' && (steps.filter.outputs.discord_bot == 'false' && steps.filter.outputs.go_common == 'false') }}  
       terraform_both: ${{ steps.filter.outputs.infra=='true' && (steps.filter.outputs.discord_bot == 'true' || steps.filter.outputs.go_common == 'true') }}
     steps:
+      - uses: actions/checkout@v7
       - uses: dorny/paths-filter@ceb8a2b8f2d89434be7ff52d3de7ec3738c5cc9d
         id: filter
         with:
