@@ -10,3 +10,15 @@ updates:
    directory: "/"
    schedule:
      interval: weekly
+ - package-ecosystem: "gomod"
+   directory: "/page-updater/"
+   schedule:
+     interval: weekly
+ - package-ecosystem: "gomod"
+   directory: "/discord-bot/"
+   schedule:
+     interval: weekly
+ - package-ecosystem: "gomod"
+   directory: "/common/"
+   schedule:
+     interval: weekly
