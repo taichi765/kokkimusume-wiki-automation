@@ -87,14 +87,19 @@ jobs:
           
   deploy_image:
     needs: discord_bot_check
+    if: ${{ github.event_name=='push' }}
     uses: ./.github/workflows/deploy_image.yaml
+    with:
+      version: v0.0.0 #TODO: dummy
 
   apply_terraform:
     needs: [terraform_check,files_changed]
+    if: ${{ github.event_name=='push' }}
     uses: ./.github/workflows/apply_terraform.yaml
     with:
       update_image: ${{ needs.files_changed.outputs.terraform_both || needs.files_changed.outputs.terraform_image_only }}
   
   update_page:
     needs: page_updater_check
+    if: ${{ github.event_name=='push' }}
     uses: ./.github/workflows/update_page.yaml
