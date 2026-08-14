@@ -14,6 +14,11 @@ import (
 const API_ENDPOINT_BASE = "https://api.wikiwiki.jp/kokkimusume"
 
 func main() {
+	l := slog.New(slog.NewJSONHandler(os.Stdout, &slog.HandlerOptions{
+		Level:     slog.LevelDebug,
+		AddSource: true,
+	}))
+	slog.SetDefault(l)
 	os.Exit(runMain())
 }
 
@@ -38,40 +43,38 @@ func runMain() int {
 
 	c := &http.Client{}
 
-	charaListSrc, err := getPageContent(c, "キャラ一覧", tok)
+	charaListSrc, err := fetchPageContent(c, "キャラ一覧", tok)
 	if err != nil {
+		slog.Error("failed to fetch character list page content", slog.Any("err", err))
 		return 1
 	}
-	slog.Info("successfully fetched content for character list page")
 
-	menubarSrc, err := getPageContent(c, "MenuBar", tok)
+	menubarSrc, err := fetchPageContent(c, "MenuBar", tok)
 	if err != nil {
+		slog.Error("failed to fetch MenuBar content", slog.Any("err", err))
 		return 1
 	}
-	slog.Info("successfully fetched content for menu bar")
 
-	newCharaListSrc, err := editCharaListPage(charaListSrc, charas)
+	newCharaListSrc, err := generateCharaListPage(charaListSrc, charas)
 	if err != nil {
 		slog.Error("failed to generate chara list page", slog.Any("err", err))
 		return 1
 	}
-	newMenubarSrc, err := editMenuBar(menubarSrc, charas)
+	newMenubarSrc, err := generateMenuBar(menubarSrc, charas)
 	if err != nil {
 		slog.Error("failed to generate MenuBar", slog.Any("err", err))
 		return 1
 	}
 
-	if err := putPageContent(c, "キャラ一覧", newCharaListSrc, tok); err != nil {
+	if err := updatePageContent(c, "キャラ一覧", newCharaListSrc, tok); err != nil {
 		slog.Error("failed to update chara list page", slog.Any("err", err))
 		return 1
 	}
-	slog.Info("successfully updated character list page")
 
-	if err := putPageContent(c, "MenuBar", newMenubarSrc, tok); err != nil {
+	if err := updatePageContent(c, "MenuBar", newMenubarSrc, tok); err != nil {
 		slog.Error("failed to update MenuBar", slog.Any("err", err))
 		return 1
 	}
-	slog.Info("successfully updated menu bar")
 
 	return 0
 }
@@ -125,8 +128,10 @@ func getAuthToken(passwd string) (string, error) {
 	return resJson.Token, nil
 }
 
-// Gets page content from WikiWiki's REST API.
-func getPageContent(c *http.Client, page string, tok string) (string, error) {
+// Fetches page content from WikiWiki's REST API.
+func fetchPageContent(c *http.Client, page string, tok string) (string, error) {
+	slog.Debug("fetching page content", slog.String("page", page))
+
 	endpoint := API_ENDPOINT_BASE + "/page/" + page
 	req, err := http.NewRequest(http.MethodGet, endpoint, nil)
 	if err != nil {
@@ -136,7 +141,7 @@ func getPageContent(c *http.Client, page string, tok string) (string, error) {
 
 	res, err := c.Do(req)
 	if err != nil {
-		return "", fmt.Errorf("failed to get page content: %w", err)
+		return "", fmt.Errorf("failed to fetch page content: %w", err)
 	}
 	defer res.Body.Close()
 
@@ -146,11 +151,15 @@ func getPageContent(c *http.Client, page string, tok string) (string, error) {
 		return "", fmt.Errorf("failed to decode response: %w", err)
 	}
 
+	slog.Debug("successfully fetched page content", slog.String("page", page), slog.String("content", resJson.Source))
+
 	return resJson.Source, nil
 }
 
 // Updates page content using WikiWiki's REST API.
-func putPageContent(c *http.Client, page string, content string, tok string) error {
+func updatePageContent(c *http.Client, page string, content string, tok string) error {
+	slog.Debug("updating page content", slog.String("page", page))
+
 	endpoint := API_ENDPOINT_BASE + "/page/" + page
 	body, err := json.Marshal(PutPageRequest{
 		Source: content,
@@ -181,6 +190,8 @@ func putPageContent(c *http.Client, page string, content string, tok string) err
 	if resJson.Status != "ok" {
 		return fmt.Errorf("something went wrong while updating page content: status was %v", resJson.Status)
 	}
+
+	slog.Debug("successfully updated page", slog.String("page", page))
 
 	return nil
 }
