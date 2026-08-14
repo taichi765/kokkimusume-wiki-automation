@@ -68,6 +68,8 @@ jobs:
         run: |
           cd terraform/bootstrap/
           terraform validate
+      - name: Init terraform
+        run: terraform init -backend=false
       - name: Validate .tf files for main
         run: |
           cd terraform/main/
