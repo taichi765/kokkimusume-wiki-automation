@@ -24,8 +24,8 @@ jobs:
           sparse-checkout: |
             go.work
             go.sum
-            discord-bot/**
-            common/**
+            discord-bot/
+            common/
       - uses: azure/login@v3
         with:
           client-id: ${{ vars.AZURE_DEPLOY_BOT_CLIENT_ID }}

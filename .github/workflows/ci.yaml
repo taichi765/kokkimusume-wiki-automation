@@ -28,8 +28,8 @@ jobs:
           sparse-checkout: |
             go.work
             go.sum
-            common/**
-            page-updater/**
+            common/
+            page-updater/
       - uses: actions/setup-go@v7
         with:
           go-version-file: ./go.work
@@ -46,8 +46,8 @@ jobs:
           sparse-checkout: |
             go.work
             go.sum
-            discord_bot/**
-            common/**
+            discord_bot/
+            common/
       - uses: actions/setup-go@v7
         with:
             go-version-file: ./go.work
@@ -62,7 +62,7 @@ jobs:
       - uses: actions/checkout@v7
         with:
           sparse-checkout: |
-            terraform/**
+            terraform/
       - uses: hashicorp/setup-terraform@v4
       - name: Validate .tf files for bootstrap
         run: |

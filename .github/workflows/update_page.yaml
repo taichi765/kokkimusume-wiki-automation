@@ -14,9 +14,9 @@ jobs:
       - uses: actions/checkout@v7
         with:
           sparse-checkout: |
-            common/**
-            page-updater/**
-            data/**
+            common/
+            page-updater/
+            data/
             go.work
             go.sum
       - uses: actions/setup-go@v7
