@@ -29,10 +29,10 @@ jobs:
         with:
           filters: |
             go-common:
-              - ./common/**
+              - 'common/**'
             page-updater:
-              - ./page-updater/**
+              - 'page-updater/**'
             discord-bot:
-              - ./discord-bot/**
+              - 'discord-bot/**'
             infra:
-              - ./terraform/**
+              - 'terraform/**'

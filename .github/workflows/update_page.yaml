@@ -3,7 +3,7 @@ on:
   push:
     branches: master
     paths:
-      - ./data/**
+      - 'data/**'
   workflow_dispatch:
   workflow_call:
     secrets:
@@ -25,8 +25,8 @@ jobs:
             data/
       - uses: actions/setup-go@v7
         with:
-          go-version-file: ./page-updater/go.mod
-          cache-dependency-path: ./page-updater/go.sum
+          go-version-file: 'page-updater/go.mod'
+          cache-dependency-path: 'page-updater/go.sum'
       - run: go run .
         env:
           WIKIWIKI_PASSWORD: ${{ secrets.WIKIWIKI_PASSWORD }}
