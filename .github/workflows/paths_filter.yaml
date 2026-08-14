@@ -29,8 +29,6 @@ jobs:
         with:
           filters: |
             go_common:
-              - ./go.work
-              - ./go.sum
               - ./common/**
             page_updater:
               - ./page-updater/**

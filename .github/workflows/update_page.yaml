@@ -10,6 +10,9 @@ on:
 jobs:
   generate_page:
     runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: page-updater/
     steps:
       - uses: actions/checkout@v7
         with:
@@ -17,12 +20,10 @@ jobs:
             common/
             page-updater/
             data/
-            go.work
-            go.sum
       - uses: actions/setup-go@v7
         with:
-          go-version-file: ./go.work
-      - run: cd ./page-updater/&&go run .
+          go-version-file: ./page-updater/go.mod
+      - run: go run .
         env:
           WIKIWIKI_PASSWORD: ${{ secrets.WIKIWIKI_PASSWORD }}
     
