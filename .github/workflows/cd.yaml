@@ -10,21 +10,21 @@ permissions:
 jobs:
   ci:
     uses: ./.github/workflows/ci.yaml
-  deploy_image:
+  deploy-image:
     needs: ci
-    if: ${{ needs.ci.outputs.discord_bot_success }}
+    if: ${{ needs.ci.outputs.discord-bot-success }}
     uses: ./.github/workflows/deploy_image.yaml
     with:
       version: v0.0.0 #TODO: dummy
 
-  apply_terraform:
+  apply-terraform:
     needs: ci
-    if: ${{ needs.ci.outputs.terraform_success }}
+    if: ${{ needs.ci.outputs.terraform-success }}
     uses: ./.github/workflows/apply_terraform.yaml
     with:
-      update_image: ${{ needs.ci.outputs.update_image }}
+      update-image: ${{ needs.ci.outputs.update-image }}
   
-  update_page:
+  update-page:
     needs: ci
-    if: ${{ needs.ci.outputs.page_updater_success }}
+    if: ${{ needs.ci.outputs.page-updater-success }}
     uses: ./.github/workflows/update_page.yaml

@@ -2,13 +2,13 @@ name: terraform apply
 on:
   workflow_call:
     inputs:
-      update_image:
+      update-image:
         type: boolean
         default: true
         description: "Whether to update container image or not"
   workflow_dispatch:
     inputs:
-      update_image:
+      update-image:
         type: boolean
         default: true
         description: "Whether to update container image or not"
@@ -34,16 +34,16 @@ jobs:
       - name: Init terraform
         run: terraform init
       - name: Get image tag
-        id: image_tag
+        id: image-tag
         run:
-          if [ "${{inputs.update_image}}" = "true" ]; then
-            echo "image_tag=${{github.sha}}" >> "$GITHUB_OUTPUT"
+          if [ "${{inputs.update-image}}" = "true" ]; then
+            echo "image-tag=${{github.sha}}" >> "$GITHUB_OUTPUT"
           else
-            echo "image_tag=$(terraform output latest_image_tag)" >> "$GITHUB_OUTPUT"
+            echo "image-tag=$(terraform output latest_image_tag)" >> "$GITHUB_OUTPUT"
           fi
       - name: Apply terraform
         run: |
-          terraform apply -auto-approve -input=false -var="commit_sha256=${{steps.image_tag.outputs.image_tag}}"\
+          terraform apply -auto-approve -input=false -var="commit_sha256=${{steps.image-tag.outputs.image-tag}}"\
             -var="github-app-id=${{vars.GH_APP_ID}}"\
             -var="github-installation-id=${{vars.GH_INSTALLATION_ID}}"\
             -var="discord-app-id=${{vars.DISCORD_APP_ID}}"\

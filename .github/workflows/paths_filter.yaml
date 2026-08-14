@@ -2,37 +2,37 @@ name: Paths Filter
 on:
   workflow_call:
     outputs:
-      page_updater: 
-        value: ${{ jobs.files_changed.outputs.page_updater }}
-      discord_bot:
-        value: ${{ jobs.files_changed.outputs.discord_bot }}
-      terraform_image_only:
-        value: ${{ jobs.files_changed.outputs.terraform_image_only }}
-      terraform_infra_only:
-        value: ${{ jobs.files_changed.outputs.terraform_infra_only }}
-      terraform_both:
-        value: ${{ jobs.files_changed.outputs.terraform_both }}
+      page-updater: 
+        value: ${{ jobs.paths-filter.outputs.page-updater }}
+      discord-bot:
+        value: ${{ jobs.paths-filter.outputs.discord-bot }}
+      terraform-image-only:
+        value: ${{ jobs.paths-filter.outputs.terraform-image-only }}
+      terraform-infra-only:
+        value: ${{ jobs.paths-filter.outputs.terraform-infra-only }}
+      terraform-both:
+        value: ${{ jobs.paths-filter.outputs.terraform-both }}
 
 jobs:
-  files_changed:
+  paths-filter:
     runs-on: ubuntu-latest
     outputs:
-      page_updater: ${{ steps.filter.outputs.page_updater == 'true' || steps.filter.outputs.go_common == 'true' }}
-      discord_bot: ${{ steps.filter.outputs.discord-bot == 'true' || steps.filter.outputs.go_common == 'true' }}
-      terraform_image_only: ${{ steps.filter.outputs.infra == 'false' && (steps.filter.outputs.discord_bot == 'true' || steps.filter.outputs.go_common == 'true') }}  
-      terraform_infra_only: ${{ steps.filter.outputs.infra == 'true' && (steps.filter.outputs.discord_bot == 'false' && steps.filter.outputs.go_common == 'false') }}  
-      terraform_both: ${{ steps.filter.outputs.infra=='true' && (steps.filter.outputs.discord_bot == 'true' || steps.filter.outputs.go_common == 'true') }}
+      page-updater: ${{ steps.filter.outputs.page-updater == 'true' || steps.filter.outputs.go-common == 'true' }}
+      discord-bot: ${{ steps.filter.outputs.discord-bot == 'true' || steps.filter.outputs.go-common == 'true' }}
+      terraform-image-only: ${{ steps.filter.outputs.infra == 'false' && (steps.filter.outputs.discord-bot == 'true' || steps.filter.outputs.go-common == 'true') }}  
+      terraform-infra-only: ${{ steps.filter.outputs.infra == 'true' && (steps.filter.outputs.discord-bot == 'false' && steps.filter.outputs.go-common == 'false') }}  
+      terraform-both: ${{ steps.filter.outputs.infra=='true' && (steps.filter.outputs.discord-bot == 'true' || steps.filter.outputs.go-common == 'true') }}
     steps:
       - uses: actions/checkout@v7
       - uses: dorny/paths-filter@ceb8a2b8f2d89434be7ff52d3de7ec3738c5cc9d
         id: filter
         with:
           filters: |
-            go_common:
+            go-common:
               - ./common/**
-            page_updater:
+            page-updater:
               - ./page-updater/**
-            discord_bot:
+            discord-bot:
               - ./discord-bot/**
             infra:
               - ./terraform/**
