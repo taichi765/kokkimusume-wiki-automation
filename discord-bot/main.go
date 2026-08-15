@@ -133,7 +133,14 @@ func runMain() int {
 	app.envVars = envVars
 	slog.Info("successfully loaded env vars")
 
-	code := app.openDiscordServer()
+	client, err := app.newBotClient()
+	if err != nil {
+		slog.Error("failed to create bot client", slog.Any("err", err))
+		return 1
+	}
+	defer client.Close(context.TODO())
+
+	code := openBotServer(client)
 	if code != 0 {
 		return code
 	}
@@ -147,7 +154,7 @@ func runMain() int {
 	return 0
 }
 
-func (a *App) openDiscordServer() int {
+func (a *App) newBotClient() (*bot.Client, error) {
 	h := handler.New()
 	h.SlashCommand("/new", newCharaModalSlashCommand)
 	h.SlashCommand("/version", versionSlashCommand)
@@ -163,11 +170,12 @@ func (a *App) openDiscordServer() int {
 		bot.WithEventListeners(h),
 	)
 	if err != nil {
-		slog.Error("error while building disgo", slog.Any("err", err))
-		return 1
+		return nil, fmt.Errorf("error while building disgo: %w", err)
 	}
-	defer client.Close(context.TODO())
+	return client, nil
+}
 
+func openBotServer(client *bot.Client) int {
 	devGuildId, ok := os.LookupEnv("DEV_DISCORD_GUILD_ID")
 	guildIds := []snowflake.ID{}
 	if ok {
@@ -183,7 +191,7 @@ func (a *App) openDiscordServer() int {
 	}
 
 	slog.Info("opening HTTP server")
-	if err = client.OpenHTTPServer(); err != nil {
+	if err := client.OpenHTTPServer(); err != nil {
 		slog.Error("failed to open HTTP server", slog.Any("err", err))
 		return 1
 	}
