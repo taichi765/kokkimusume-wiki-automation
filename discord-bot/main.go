@@ -206,7 +206,7 @@ func (a *App) openACAProbeServer() {
 		Handler: mux,
 	}
 	go func() {
-		slog.Info("startup probe server is now listening...")
+		slog.Info("health probe server is now listening...", slog.String("addr", addr))
 		err := s.ListenAndServe()
 		if err != nil {
 			slog.Error("something went wrong in startup server", slog.Any("err", err))
