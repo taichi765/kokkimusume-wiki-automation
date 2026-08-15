@@ -12,7 +12,7 @@ resource "azuread_service_principal" "msgraph" {
 
 resource "azurerm_resource_group" "boot" {
   name     = "kokkimusume-discordbot-boot-resources"
-  location = "Japan East"
+  location = "East US"
 }
 
 resource "azuread_application" "gh-actions-apply" {
