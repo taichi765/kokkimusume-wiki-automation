@@ -10,7 +10,10 @@ terraform {
 provider "azurerm" {
   subscription_id = "ad53c5b5-a699-4d4e-8125-0619976eb022"
   features {
-
+    key_vault {
+      purge_soft_deleted_secrets_on_destroy = true
+      recover_soft_deleted_secrets = true
+    }
   }
 }
 
