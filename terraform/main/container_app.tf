@@ -126,6 +126,16 @@ resource "azurerm_container_app" "app" {
   }
 }
 
+resource "azurerm_monitor_diagnostic_setting" "containerapp" {
+  name = "containerapp"
+  target_resource_id = azurerm_container_app_environment.app.id
+  log_analytics_workspace_id = azurerm_log_analytics_workspace.app.id
+
+  enabled_log {
+    category = "HTTPLogs"
+  }
+}
+
 resource "azurerm_user_assigned_identity" "app" {
   name                = "kokkimusume-discortbot-identity"
   location            = data.azurerm_resource_group.app.location
