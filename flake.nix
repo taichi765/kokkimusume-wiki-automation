@@ -2,13 +2,20 @@
   description = "A very basic flake";
 
   inputs = {
-    nixpkgs.url = "github:nixos/nixpkgs/nixpkgs-unstable";
+    nixpkgs = {
+      url = "github:nixos/nixpkgs/nixpkgs-unstable";
+    };
   };
 
   outputs = {self,nixpkgs}: 
     let
       system = "x86_64-linux";
-      pkgs = import nixpkgs { inherit system;};
+      pkgs = import nixpkgs {
+        inherit system;
+        config.allowUnfreePredicate = pkg: builtins.elem (pkgs.lib.getName pkg) [
+          "terraform"
+       ];
+      };
     in {
       devShells.${system}.default =  pkgs.mkShell {
         buildInputs = [
