@@ -20,8 +20,7 @@ resource "azurerm_container_app_environment" "app" {
   name                       = "app-env"
   location                   = data.azurerm_resource_group.app.location
   resource_group_name        = data.azurerm_resource_group.app.name
-  log_analytics_workspace_id = azurerm_log_analytics_workspace.app.id
-  logs_destination           = "log-analytics"
+  logs_destination           = "azure-monitor"
 }
 
 resource "azurerm_container_app" "app" {
@@ -132,7 +131,7 @@ resource "azurerm_monitor_diagnostic_setting" "containerapp" {
   log_analytics_workspace_id = azurerm_log_analytics_workspace.app.id
 
   enabled_log {
-    category = "HTTPLogs"
+    category = "ContainerAppHTTPLogs"
   }
 }
 
