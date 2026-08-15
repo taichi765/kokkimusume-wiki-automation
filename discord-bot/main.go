@@ -4,14 +4,15 @@ import (
 	"context"
 	"fmt"
 	"log/slog"
+	"net/http"
 	"os"
 	"os/signal"
 	"strconv"
+	"sync/atomic"
 	"syscall"
 
 	"github.com/disgoorg/disgo"
 	"github.com/disgoorg/disgo/bot"
-	"github.com/disgoorg/disgo/discord"
 	"github.com/disgoorg/disgo/handler"
 	"github.com/disgoorg/disgo/httpserver"
 	"github.com/disgoorg/snowflake/v2"
@@ -23,8 +24,8 @@ var version = "unknown"
 var commitHash = "unknown"
 
 type App struct {
-	envVars *EnvVars
-	client  *bot.Client
+	envVars   *EnvVars
+	isStarted *atomic.Bool
 }
 
 type EnvVars struct {
@@ -107,19 +108,6 @@ func main() {
 }
 
 func runMain() int {
-	code := startup()
-	if code != 0 {
-		return code
-	}
-
-	slog.Info("example is now running. Press CTRL-C to exit.")
-	s := make(chan os.Signal, 1)
-	signal.Notify(s, syscall.SIGINT, syscall.SIGTERM, os.Interrupt)
-	<-s
-	return 0
-}
-
-func startup() int {
 	slog.Info("loading env vars")
 	envVars, err := loadEnvVars()
 	if err != nil {
@@ -129,19 +117,34 @@ func startup() int {
 	slog.Info("successfully loaded env vars")
 
 	app := App{
-		envVars: envVars,
-		client:  nil,
+		envVars:   envVars,
+		isStarted: &atomic.Bool{},
 	}
 
+	app.openStartupProbeServer()
+
+	code := app.openDiscordServer()
+	if code != 0 {
+		return code
+	}
+
+	slog.Info("bot server is now running. Press CTRL-C to exit.")
+	s := make(chan os.Signal, 1)
+	signal.Notify(s, syscall.SIGINT, syscall.SIGTERM, os.Interrupt)
+	<-s
+	return 0
+}
+
+func (a *App) openDiscordServer() int {
 	h := handler.New()
 	h.SlashCommand("/new", newCharaModalSlashCommand)
 	h.SlashCommand("/version", versionSlashCommand)
 	h.SlashCommand("/help", helpSlashCommand)
-	h.Modal("/modals/new", app.onNewCharaModalSubmitted)
+	h.Modal("/modals/new", a.onNewCharaModalSubmitted)
 
-	tok := envVars.discordToken
+	tok := a.envVars.discordToken
 	client, err := disgo.New(tok,
-		bot.WithHTTPServerConfigOpts(app.envVars.discordPublicKey,
+		bot.WithHTTPServerConfigOpts(a.envVars.discordPublicKey,
 			httpserver.WithURL("/interactions/"),
 			httpserver.WithAddress(":8080"),
 		),
@@ -152,7 +155,6 @@ func startup() int {
 		return 1
 	}
 	defer client.Close(context.TODO())
-	app.client = client
 
 	devGuildId, ok := os.LookupEnv("DEV_DISCORD_GUILD_ID")
 	guildIds := []snowflake.ID{}
@@ -173,6 +175,43 @@ func startup() int {
 		slog.Error("failed to open HTTP server", slog.Any("err", err))
 		return 1
 	}
+	a.isStarted.Store(true)
 
 	return 0
+}
+
+// Provides endpoint for Startup probe in Azure Container Apps.
+func (a *App) openStartupProbeServer() {
+	addr := ":8081"
+
+	slog.Info("starting startup probe server", slog.String("addr", addr))
+
+	mux := a.newStartupProbeServeMux(addr)
+	s := &http.Server{
+		Addr:    addr,
+		Handler: mux,
+	}
+	go func() {
+		slog.Info("startup probe server is now listening...")
+		err := s.ListenAndServe()
+		if err != nil {
+			slog.Error("something went wrong in startup server", slog.Any("err", err))
+		}
+	}()
+}
+
+// Creates [http.ServeMux] to expose startup status.
+func (a *App) newStartupProbeServeMux(addr string) *http.ServeMux {
+	mux := http.NewServeMux()
+	mux.HandleFunc("/", a.startupHandler)
+	return mux
+}
+
+// Used with [http.HandleFunc] in [newStartupProbeServer]
+func (a *App) startupHandler(w http.ResponseWriter, r *http.Request) {
+	if a.isStarted.Load() {
+		w.WriteHeader(http.StatusOK)
+	} else {
+		w.WriteHeader(http.StatusServiceUnavailable)
+	}
 }

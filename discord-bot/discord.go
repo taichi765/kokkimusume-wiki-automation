@@ -126,10 +126,6 @@ func (a *App) onNewCharaModalSubmitted(e *handler.ModalEvent) error {
 		return err
 	}
 
-	if a.client == nil {
-		return fmt.Errorf("client was not initialized")
-	}
-
 	nameInput, ok := e.Data.TextInput("/modals/new/name-input")
 	if !ok {
 		return fmt.Errorf("can't get name-input data from modal event")

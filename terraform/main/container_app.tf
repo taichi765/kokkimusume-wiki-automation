@@ -75,6 +75,12 @@ resource "azurerm_container_app" "app" {
       cpu    = 0.25
       memory = "0.5Gi"
 
+      startup_probe {
+        port = 8081
+        transport = "HTTPS"
+        path = "/"
+      }
+
       env {
         name  = "GITHUB_APP_ID"
         value = var.github-app-id
