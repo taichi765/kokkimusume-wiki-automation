@@ -26,6 +26,8 @@ var commitHash = "unknown"
 type App struct {
 	envVars   *EnvVars
 	isStarted *atomic.Bool
+	isReady   *atomic.Bool
+	isLiving  *atomic.Bool
 }
 
 type EnvVars struct {
@@ -108,25 +110,30 @@ func main() {
 }
 
 func runMain() int {
+	app := App{
+		envVars:   nil,
+		isStarted: &atomic.Bool{},
+		isReady:   &atomic.Bool{},
+		isLiving:  &atomic.Bool{},
+	}
+	app.isLiving.Store(true)
+	app.openACAProbeServer()
+
 	slog.Info("loading env vars")
 	envVars, err := loadEnvVars()
 	if err != nil {
 		slog.Error("failed to load env vars", slog.Any("err", err))
 		return 1
 	}
+	app.envVars = envVars
 	slog.Info("successfully loaded env vars")
-
-	app := App{
-		envVars:   envVars,
-		isStarted: &atomic.Bool{},
-	}
-
-	app.openStartupProbeServer()
 
 	code := app.openDiscordServer()
 	if code != 0 {
 		return code
 	}
+	app.isStarted.Store(true)
+	app.isReady.Store(true)
 
 	slog.Info("bot server is now running. Press CTRL-C to exit.")
 	s := make(chan os.Signal, 1)
@@ -175,18 +182,20 @@ func (a *App) openDiscordServer() int {
 		slog.Error("failed to open HTTP server", slog.Any("err", err))
 		return 1
 	}
-	a.isStarted.Store(true)
 
 	return 0
 }
 
-// Provides endpoint for Startup probe in Azure Container Apps.
-func (a *App) openStartupProbeServer() {
+// Provides endpoint for health probe in Azure Container Apps.
+func (a *App) openACAProbeServer() {
+	// TODO: test that this function doesn't use a.envVars,
+	// since it's called before startup phase completes.
+
 	addr := ":8081"
 
-	slog.Info("starting startup probe server", slog.String("addr", addr))
+	slog.Info("starting ACA healthy probe server", slog.String("addr", addr))
 
-	mux := a.newStartupProbeServeMux()
+	mux := a.newACAProbeServeMux()
 	s := &http.Server{
 		Addr:    addr,
 		Handler: mux,
@@ -200,16 +209,34 @@ func (a *App) openStartupProbeServer() {
 	}()
 }
 
-// Creates [http.ServeMux] to expose startup status.
-func (a *App) newStartupProbeServeMux() *http.ServeMux {
+// Creates [http.ServeMux] to respond to ACA's health probes.
+func (a *App) newACAProbeServeMux() *http.ServeMux {
 	mux := http.NewServeMux()
-	mux.HandleFunc("/", a.startupHandler)
+	mux.HandleFunc("/startup", a.startupHandler)
+	mux.HandleFunc("/readiness", a.readinessHandler)
+	mux.HandleFunc("/liveness", a.livenessHandler)
 	return mux
 }
 
-// Used with [http.HandleFunc] in [newStartupProbeServer]
+// Used with [http.HandleFunc] in [newACAProbeServer]
 func (a *App) startupHandler(w http.ResponseWriter, r *http.Request) {
 	if a.isStarted.Load() {
+		w.WriteHeader(http.StatusOK)
+	} else {
+		w.WriteHeader(http.StatusServiceUnavailable)
+	}
+}
+
+func (a *App) readinessHandler(w http.ResponseWriter, r *http.Request) {
+	if a.isReady.Load() {
+		w.WriteHeader(http.StatusOK)
+	} else {
+		w.WriteHeader(http.StatusServiceUnavailable)
+	}
+}
+
+func (a *App) livenessHandler(w http.ResponseWriter, r *http.Request) {
+	if a.isLiving.Load() {
 		w.WriteHeader(http.StatusOK)
 	} else {
 		w.WriteHeader(http.StatusServiceUnavailable)

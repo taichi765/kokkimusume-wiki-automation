@@ -78,7 +78,19 @@ resource "azurerm_container_app" "app" {
       startup_probe {
         port = 8081
         transport = "HTTP"
-        path = "/"
+        path = "/startup"
+      }
+
+      readiness_probe {
+        port = 8081
+        transport = "HTTP"
+        path = "/readiness"
+      }
+
+      liveness_probe {
+        port = 8081
+        transport = "HTTP"
+        path = "/liveness"
       }
 
       env {

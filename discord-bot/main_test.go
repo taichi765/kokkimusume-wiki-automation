@@ -27,34 +27,62 @@ import (
 	}
 }*/
 
-func TestStartupProbeServeMux(t *testing.T) {
-	testCases := []struct {
-		desc         string
-		isStarted    bool
-		target       string
-		expectedCode int
-	}{
-		{
-			desc:         "not started",
-			isStarted:    false,
-			target:       "/",
-			expectedCode: http.StatusServiceUnavailable,
-		},
-		{
-			desc:         "started",
-			isStarted:    true,
-			target:       "/",
-			expectedCode: http.StatusOK,
-		},
+type testCase struct {
+	desc         string
+	isStarted    bool
+	isReady      bool
+	isLiving     bool
+	target       string
+	expectedCode int
+}
+
+func newTestCase(desc, target string, expectedCode int) testCase {
+	return testCase{
+		desc:         desc,
+		isStarted:    true,
+		isReady:      true,
+		isLiving:     true,
+		target:       target,
+		expectedCode: expectedCode,
+	}
+}
+
+func (tc testCase) WithNotStarted() testCase {
+	tc.isStarted = false
+	return tc
+}
+
+func (tc testCase) WithNotReady() testCase {
+	tc.isReady = false
+	return tc
+}
+
+func (tc testCase) WithNotLiving() testCase {
+	tc.isLiving = false
+	return tc
+}
+
+func TestACAProbeServeMux(t *testing.T) {
+	testCases := []testCase{
+		newTestCase("not started", "/startup", http.StatusServiceUnavailable).WithNotStarted(),
+		newTestCase("started", "/startup", http.StatusOK),
+		newTestCase("not ready", "/readiness", http.StatusServiceUnavailable).WithNotReady(),
+		newTestCase("ready", "/readiness", http.StatusOK),
+		newTestCase("not living", "/liveness", http.StatusServiceUnavailable).WithNotLiving(),
+		newTestCase("living", "/liveness", http.StatusOK),
 	}
 	for _, tC := range testCases {
 		t.Run(tC.desc, func(t *testing.T) {
 			a := App{
 				isStarted: &atomic.Bool{},
+				isReady:   &atomic.Bool{},
+				isLiving:  &atomic.Bool{},
 			}
 			a.isStarted.Store(tC.isStarted)
+			a.isReady.Store(tC.isReady)
+			a.isLiving.Store(tC.isLiving)
 
-			mux := a.newStartupProbeServeMux()
+			mux := a.newACAProbeServeMux()
 			req := httptest.NewRequest(http.MethodGet, tC.target, nil)
 			rec := httptest.NewRecorder()
 
