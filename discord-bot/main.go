@@ -32,6 +32,32 @@ var commands = []discord.ApplicationCommandCreate{
 			discord.InteractionContextTypeGuild,
 		},
 	},
+	discord.SlashCommandCreate{
+		Name:        "version",
+		Description: "show bot's version",
+		DescriptionLocalizations: map[discord.Locale]string{
+			discord.LocaleJapanese: "ボットのバージョンを表示する",
+		},
+		IntegrationTypes: []discord.ApplicationIntegrationType{
+			discord.ApplicationIntegrationTypeGuildInstall,
+		},
+		Contexts: []discord.InteractionContextType{
+			discord.InteractionContextTypeGuild,
+		},
+	},
+	discord.SlashCommandCreate{
+		Name:        "help",
+		Description: "print help",
+		DescriptionLocalizations: map[discord.Locale]string{
+			discord.LocaleJapanese: "ボットの使い方を表示する",
+		},
+		IntegrationTypes: []discord.ApplicationIntegrationType{
+			discord.ApplicationIntegrationTypeGuildInstall,
+		},
+		Contexts: []discord.InteractionContextType{
+			discord.InteractionContextTypeGuild,
+		},
+	},
 }
 
 // set in ldFlags
