@@ -186,7 +186,7 @@ func (a *App) openStartupProbeServer() {
 
 	slog.Info("starting startup probe server", slog.String("addr", addr))
 
-	mux := a.newStartupProbeServeMux(addr)
+	mux := a.newStartupProbeServeMux()
 	s := &http.Server{
 		Addr:    addr,
 		Handler: mux,
@@ -201,7 +201,7 @@ func (a *App) openStartupProbeServer() {
 }
 
 // Creates [http.ServeMux] to expose startup status.
-func (a *App) newStartupProbeServeMux(addr string) *http.ServeMux {
+func (a *App) newStartupProbeServeMux() *http.ServeMux {
 	mux := http.NewServeMux()
 	mux.HandleFunc("/", a.startupHandler)
 	return mux

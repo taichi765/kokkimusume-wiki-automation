@@ -54,7 +54,7 @@ func TestStartupProbeServeMux(t *testing.T) {
 			}
 			a.isStarted.Store(tC.isStarted)
 
-			mux := a.newStartupProbeServeMux(":8081")
+			mux := a.newStartupProbeServeMux()
 			req := httptest.NewRequest(http.MethodGet, tC.target, nil)
 			rec := httptest.NewRecorder()
 
