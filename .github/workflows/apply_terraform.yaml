@@ -35,7 +35,7 @@ jobs:
         run: terraform init
       - name: Get image tag
         id: image-tag
-        run:
+        run: |
           if [ "${{inputs.update-image}}" = "true" ]; then
             echo "image-tag=${{github.sha}}" >> "$GITHUB_OUTPUT"
           else
