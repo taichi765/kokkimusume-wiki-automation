@@ -77,7 +77,7 @@ resource "azurerm_container_app" "app" {
 
       startup_probe {
         port = 8081
-        transport = "HTTPS"
+        transport = "HTTP"
         path = "/"
       }
 
