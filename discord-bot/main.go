@@ -123,6 +123,19 @@ func main() {
 }
 
 func runMain() int {
+	code := startup()
+	if code != 0 {
+		return code
+	}
+
+	slog.Info("example is now running. Press CTRL-C to exit.")
+	s := make(chan os.Signal, 1)
+	signal.Notify(s, syscall.SIGINT, syscall.SIGTERM, os.Interrupt)
+	<-s
+	return 0
+}
+
+func startup() int {
 	slog.Info("loading env vars")
 	envVars, err := loadEnvVars()
 	if err != nil {
@@ -177,9 +190,5 @@ func runMain() int {
 		return 1
 	}
 
-	slog.Info("example is now running. Press CTRL-C to exit.")
-	s := make(chan os.Signal, 1)
-	signal.Notify(s, syscall.SIGINT, syscall.SIGTERM, os.Interrupt)
-	<-s
 	return 0
 }
