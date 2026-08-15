@@ -20,7 +20,9 @@ resource "azurerm_container_app_environment" "app" {
   name                       = "app-env"
   location                   = data.azurerm_resource_group.app.location
   resource_group_name        = data.azurerm_resource_group.app.name
-  logs_destination           = "azure-monitor"
+  log_analytics_workspace_id = azurerm_log_analytics_workspace.app.id
+  logs_destination           = "log-analytics"
+  #logs_destination           = "azure-monitor"
 }
 
 resource "azurerm_container_app" "app" {
