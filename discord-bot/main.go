@@ -18,48 +18,6 @@ import (
 	"github.com/joho/godotenv"
 )
 
-var commands = []discord.ApplicationCommandCreate{
-	discord.SlashCommandCreate{
-		Name:        "new",
-		Description: "append new character to CSV file on github",
-		DescriptionLocalizations: map[discord.Locale]string{
-			discord.LocaleJapanese: "新しい国旗娘をGitHub上のCSVファイルに追加する",
-		},
-		IntegrationTypes: []discord.ApplicationIntegrationType{
-			discord.ApplicationIntegrationTypeGuildInstall,
-		},
-		Contexts: []discord.InteractionContextType{
-			discord.InteractionContextTypeGuild,
-		},
-	},
-	discord.SlashCommandCreate{
-		Name:        "version",
-		Description: "show bot's version",
-		DescriptionLocalizations: map[discord.Locale]string{
-			discord.LocaleJapanese: "ボットのバージョンを表示する",
-		},
-		IntegrationTypes: []discord.ApplicationIntegrationType{
-			discord.ApplicationIntegrationTypeGuildInstall,
-		},
-		Contexts: []discord.InteractionContextType{
-			discord.InteractionContextTypeGuild,
-		},
-	},
-	discord.SlashCommandCreate{
-		Name:        "help",
-		Description: "print help",
-		DescriptionLocalizations: map[discord.Locale]string{
-			discord.LocaleJapanese: "ボットの使い方を表示する",
-		},
-		IntegrationTypes: []discord.ApplicationIntegrationType{
-			discord.ApplicationIntegrationTypeGuildInstall,
-		},
-		Contexts: []discord.InteractionContextType{
-			discord.InteractionContextTypeGuild,
-		},
-	},
-}
-
 // set in ldFlags
 var version = "unknown"
 var commitHash = "unknown"
