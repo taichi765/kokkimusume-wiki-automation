@@ -11,12 +11,27 @@ jobs:
   ci:
     uses: ./.github/workflows/ci.yaml
 
+  get-version:
+    runs-on: ubuntu-latest
+    outputs:
+      version: ${{ steps.get-version.outputs.version }}
+
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          sparse-checkout:
+      - name: Get version
+        id: get-version
+        run: |
+          TAG=$(git describe --tags --abbrev=0 --match "discord-bot/**")
+          echo "version=${TAG#discord-bot/}" >> "$GITHUB_OUTPUT"
+
   deploy-image:
-    needs: ci
+    needs: [ci,get-version]
     if: ${{ needs.ci.outputs.discord-bot-success == 'true' }}
     uses: ./.github/workflows/deploy_image.yaml
     with:
-      version: v0.0.0 #TODO: dummy
+      version: ${{ needs.get-version.outputs.version }} #TODO: dummy
 
   apply-terraform:
     needs: ci
