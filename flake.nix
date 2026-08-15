@@ -20,7 +20,7 @@
       devShells.${system}.default =  pkgs.mkShell {
         buildInputs = [
           pkgs.go
-          pkgs.azure-cli
+          (with pkgs.azure-cli; withExtensions [ extensions.log-analytics ])
           pkgs.terraform
           pkgs.just
         ];
