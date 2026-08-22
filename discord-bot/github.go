@@ -5,7 +5,9 @@ import (
 	"context"
 	"encoding/csv"
 	"fmt"
+	"io"
 	"net/http"
+	"strings"
 
 	"github.com/bradleyfalzon/ghinstallation/v2"
 	"github.com/google/go-github/v88/github"
@@ -16,21 +18,40 @@ const REPO_OWNER = "taichi765"
 const REPO_NAME = "kokkimusume-wiki-automation"
 const CHARA_CSV_PATH = "data/charas.csv"
 
-func updateCsv(chara common.CharacterData, appId, installationId int64, privateKey []byte) error {
-	client, err := newClient(appId, installationId, privateKey)
+// Error returned from [updateCsv].
+type CharaAlreadyExistsError struct {
+	Name string
+}
+
+func (e *CharaAlreadyExistsError) Error() string {
+	return fmt.Sprintf("charater %s already exists", e.Name)
+}
+
+func updateCsv(chara common.CharacterData, c *github.Client) error {
+	content, err := getCsvContent(c)
 	if err != nil {
 		return err
-	}
-
-	content, _, _, err := client.Repositories.GetContents(context.TODO(), REPO_OWNER, REPO_NAME, CHARA_CSV_PATH, &github.RepositoryContentGetOptions{})
-	if err != nil {
-		return fmt.Errorf("failed to get file content: %w", err)
 	}
 
 	sha := content.GetSHA()
 	old, err := content.GetContent()
 	if err != nil {
 		return fmt.Errorf("failed to read content from reponse: %w", err)
+	}
+
+	rd := csv.NewReader(strings.NewReader(old))
+	for {
+		r, err := rd.Read()
+		if err == io.EOF {
+			break
+		}
+		if err != nil {
+			return fmt.Errorf("failed to read CSV file: %w", err)
+		}
+
+		if r[0] == chara.Name {
+			return &CharaAlreadyExistsError{chara.Name}
+		}
 	}
 
 	b := bytes.NewBuffer([]byte(old))
@@ -45,7 +66,7 @@ func updateCsv(chara common.CharacterData, appId, installationId int64, privateK
 	}
 
 	msg := "Update chara.csv"
-	_, _, err = client.Repositories.UpdateFile(context.TODO(), REPO_OWNER, REPO_NAME, CHARA_CSV_PATH, &github.RepositoryContentFileOptions{
+	_, _, err = c.Repositories.UpdateFile(context.TODO(), REPO_OWNER, REPO_NAME, CHARA_CSV_PATH, &github.RepositoryContentFileOptions{
 		Message: &msg,
 		Content: b.Bytes(),
 		SHA:     &sha,
@@ -55,6 +76,14 @@ func updateCsv(chara common.CharacterData, appId, installationId int64, privateK
 	}
 
 	return nil
+}
+
+func getCsvContent(c *github.Client) (*github.RepositoryContent, error) {
+	content, _, _, err := c.Repositories.GetContents(context.TODO(), REPO_OWNER, REPO_NAME, CHARA_CSV_PATH, &github.RepositoryContentGetOptions{})
+	if err != nil {
+		return nil, fmt.Errorf("failed to get file content: %w", err)
+	}
+	return content, nil
 }
 
 func newClient(appId, installationId int64, privateKey []byte) (*github.Client, error) {
