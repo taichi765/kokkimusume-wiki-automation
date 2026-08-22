@@ -192,7 +192,9 @@ func (a *App) handleUpdateCsv(chara common.CharacterData, createFollowupMessage 
 		return
 	}
 
-	if _, err := createFollowupMessage(discord.NewMessageCreate().WithContent("CSVファイルの更新に成功しました")); err != nil {
+	if _, err := createFollowupMessage(
+		discord.NewMessageCreate().WithContentf("%sをCSVファイルに追加しました", chara.Name),
+	); err != nil {
 		slog.Error("failed to send message", slog.Any("err", err))
 	}
 }
