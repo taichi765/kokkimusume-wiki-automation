@@ -122,9 +122,17 @@ func newCharaModalSlashCommand(data discord.SlashCommandInteractionData, e *hand
 func (a *App) onNewCharaModalSubmitted(e *handler.ModalEvent) error {
 	slog.Debug("received modal event for /modals/new")
 
-	if err := e.DeferCreateMessage(false); err != nil {
+	if err := e.Respond(
+		discord.InteractionResponseTypeDeferredCreateMessage,
+		discord.NewMessageCreate().
+			WithEphemeral(true).
+			WithContent("waiting for inputs..."),
+	); err != nil {
 		return err
 	}
+	/*if err := e.DeferCreateMessage(false); err != nil {
+	return err
+	}*/
 
 	nameInput, ok := e.Data.TextInput("/modals/new/name-input")
 	if !ok {
