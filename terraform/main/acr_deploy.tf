@@ -1,3 +1,5 @@
+# Github Actionsでイメージをデプロイする用のアプリケーション
+
 data "terraform_remote_state" "boot" {
   backend = "azurerm"
 

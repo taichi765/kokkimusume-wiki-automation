@@ -38,6 +38,11 @@ resource "azurerm_role_assignment" "contributor" {
   principal_id         = azuread_service_principal.gh-actions-apply.object_id
 }
 
+resource "azurerm_role_assignment" "detector_contributor" {
+  scope                = azurerm_resource_group.detector.id
+  role_definition_name = "Contributor"
+  principal_id         = azuread_service_principal.gh-actions-apply.object_id
+}
 
 resource "azurerm_role_assignment" "storage" {
   scope                = data.azurerm_storage_account.backend.id
@@ -59,5 +64,10 @@ resource "azuread_app_role_assignment" "readwrite" {
 
 resource "azurerm_resource_group" "app" {
   name     = "kokkimusume-discordbot-resources"
+  location = "Japan East"
+}
+
+resource "azurerm_resource_group" "detector" {
+  name     = "deletion-detector"
   location = "Japan East"
 }

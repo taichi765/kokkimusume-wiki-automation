@@ -1,3 +1,7 @@
+data "azurerm_resource_group" "app" {
+  name = "kokkimusume-discordbot-resources"
+}
+
 resource "azurerm_log_analytics_workspace" "app" {
   name                = "log-analytics-workspace"
   location            = data.azurerm_resource_group.app.location
@@ -31,15 +35,13 @@ resource "azurerm_container_app" "app" {
   resource_group_name          = data.azurerm_resource_group.app.name
   revision_mode                = "Single"
 
-  depends_on = [azurerm_role_assignment.acr_pull, azurerm_role_assignment.key_vault]
-
   identity {
     type         = "UserAssigned"
     identity_ids = [azurerm_user_assigned_identity.app.id]
   }
 
   registry {
-    server   = azurerm_container_registry.acr.login_server
+    server   = var.acr_login_server
     identity = azurerm_user_assigned_identity.app.id
   }
 
@@ -77,21 +79,21 @@ resource "azurerm_container_app" "app" {
       memory = "0.5Gi"
 
       startup_probe {
-        port = 8081
+        port      = 8081
         transport = "HTTP"
-        path = "/startup"
+        path      = "/startup"
       }
 
       readiness_probe {
-        port = 8081
+        port      = 8081
         transport = "HTTP"
-        path = "/readiness"
+        path      = "/readiness"
       }
 
       liveness_probe {
-        port = 8081
+        port      = 8081
         transport = "HTTP"
-        path = "/liveness"
+        path      = "/liveness"
       }
 
       env {
@@ -128,29 +130,11 @@ resource "azurerm_container_app" "app" {
 }
 
 resource "azurerm_monitor_diagnostic_setting" "containerapp" {
-  name = "containerapp"
-  target_resource_id = azurerm_container_app_environment.app.id
+  name                       = "containerapp"
+  target_resource_id         = azurerm_container_app_environment.app.id
   log_analytics_workspace_id = azurerm_log_analytics_workspace.app.id
 
   enabled_log {
     category = "ContainerAppHTTPLogs"
   }
-}
-
-resource "azurerm_user_assigned_identity" "app" {
-  name                = "kokkimusume-discortbot-identity"
-  location            = data.azurerm_resource_group.app.location
-  resource_group_name = data.azurerm_resource_group.app.name
-}
-
-resource "azurerm_role_assignment" "acr_pull" {
-  scope                = azurerm_container_registry.acr.id
-  role_definition_name = "AcrPull"
-  principal_id         = azurerm_user_assigned_identity.app.principal_id
-}
-
-resource "azurerm_role_assignment" "key_vault" {
-  scope                = azurerm_key_vault.app.id
-  role_definition_name = "Key Vault Secrets User"
-  principal_id         = azurerm_user_assigned_identity.app.principal_id
 }
