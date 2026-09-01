@@ -18,7 +18,7 @@ output "acr_deploy_client_id" {
   value = azuread_application.acr-deploy.client_id
 }
 
-output "latest_image_tag" {
+output "discord_bot_latest_image_tag" {
   # 将来的にprodとdevで分けたらここも分岐する
   value = var.commit_sha256
 }

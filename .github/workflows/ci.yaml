@@ -29,7 +29,8 @@ jobs:
       - uses: actions/checkout@v7
         with:
           sparse-checkout: |
-            common/
+            types/
+            wikiwiki/
             page-updater/
       - uses: actions/setup-go@v7
         with:
@@ -50,7 +51,7 @@ jobs:
         with:
           sparse-checkout: |
             discord-bot/
-            common/
+            types/
       - uses: actions/setup-go@v7
         with:
             go-version-file: ./discord-bot/go.mod
