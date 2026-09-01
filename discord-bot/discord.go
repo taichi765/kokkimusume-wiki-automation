@@ -9,6 +9,7 @@ import (
 	"github.com/disgoorg/disgo/discord"
 	"github.com/disgoorg/disgo/handler"
 	"github.com/disgoorg/disgo/rest"
+	"github.com/taichi765/kokkimusume-wiki-automation/types"
 )
 
 var commands = []discord.ApplicationCommandCreate{
@@ -95,8 +96,8 @@ func newCharaModalSlashCommand(data discord.SlashCommandInteractionData, e *hand
 	// FIXME: 日本のサーバで実行されるとは限らないかも? UTC+9と指定したほうが良いかも知らん
 	today := time.Now().Local().Format("2006/01/02")
 
-	areaOptions := make([]discord.StringSelectMenuOption, len(common.ValidAreas))
-	for i, a := range common.ValidAreas {
+	areaOptions := make([]discord.StringSelectMenuOption, len(types.ValidAreas))
+	for i, a := range types.ValidAreas {
 		areaOptions[i] = discord.NewStringSelectMenuOption(a, a)
 	}
 
@@ -156,7 +157,7 @@ func (a *App) onNewCharaModalSubmitted(e *handler.ModalEvent) error {
 		return err
 	}
 
-	chara := common.CharacterData{
+	chara := types.CharacterData{
 		Name:                nameInput.Value,
 		Area:                areaInput.Values[0],
 		FirstAppearenceDate: dateInput.Value,
@@ -191,7 +192,7 @@ func validateDateInput(val string) error {
 	return nil
 }
 
-func (a *App) handleUpdateCsv(chara common.CharacterData, createFollowupMessage func(discord.MessageCreate, ...rest.RequestOpt) (*discord.Message, error)) {
+func (a *App) handleUpdateCsv(chara types.CharacterData, createFollowupMessage func(discord.MessageCreate, ...rest.RequestOpt) (*discord.Message, error)) {
 	client, err := newClient(a.envVars.githubAppId, a.envVars.githubInstallationId, a.envVars.githubPrivateKey)
 	if err != nil {
 		createFollowupMessage(discord.NewMessageCreate().WithContentf("failed to build github client: %v", err))

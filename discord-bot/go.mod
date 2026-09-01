@@ -5,7 +5,7 @@ go 1.26.5
 require (
 	github.com/disgoorg/disgo v0.19.6
 	github.com/joho/godotenv v1.5.1
-	github.com/taichi765/kokkimusume-wiki-automation/common v0.0.0
+	github.com/taichi765/kokkimusume-wiki-automation/types v0.0.0
 )
 
 require (

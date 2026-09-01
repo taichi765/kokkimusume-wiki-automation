@@ -9,7 +9,9 @@ import (
 	"net/http"
 	"strings"
 
+	"github.com/bradleyfalzon/ghinstallation/v2"
 	"github.com/google/go-github/v88/github"
+	"github.com/taichi765/kokkimusume-wiki-automation/types"
 )
 
 const REPO_OWNER = "taichi765"
@@ -25,7 +27,7 @@ func (e *CharaAlreadyExistsError) Error() string {
 	return fmt.Sprintf("charater %s already exists", e.Name)
 }
 
-func updateCsv(chara common.CharacterData, c *github.Client) error {
+func updateCsv(chara types.CharacterData, c *github.Client) error {
 	content, err := getCsvContent(c)
 	if err != nil {
 		return err
