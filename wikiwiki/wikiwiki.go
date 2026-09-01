@@ -22,6 +22,17 @@ type AuthResponse struct {
 	Token  string `json:"token"`
 }
 
+// GetPageListResponse is a response for `GET https;//api.wikiwiki.jp/<wiki-name>/pages`
+type GetPageListResponse struct {
+	Pages []GeneralPageInfo `json:"pages"`
+}
+
+// GeneralPageInfo is used in [getPageListResponse].
+type GeneralPageInfo struct {
+	Name      string `json:"name"`
+	Timestamp string `json:"timestamp"`
+}
+
 // GetPageResponse is a response for `GET https://api.wikiwiki.jp/<wiki-name>/page/<page-name>`
 type GetPageResponse struct {
 	Page      string `json:"page"`
@@ -75,6 +86,42 @@ func GetAuthToken(passwd string) (string, error) {
 	}
 
 	return resJson.Token, nil
+}
+
+// GetPageList gets the list of pages from wikiwiki.
+func GetPageList(c *http.Client, tok string) (GetPageListResponse, error) {
+	slog.Debug("getting page list")
+
+	endpoint := ApiEndpointBase + "/pages"
+	req, err := http.NewRequest(http.MethodGet, endpoint, nil)
+	if err != nil {
+		panic("request must be valid")
+	}
+	req.Header.Add("Authorizarion", "Bearer "+tok)
+
+	res, err := c.Do(req)
+	if err != nil {
+		return GetPageListResponse{}, err
+	}
+	defer func() {
+		if cerr := res.Body.Close(); cerr != nil {
+			err = errors.Join(err, cerr)
+		}
+	}()
+
+	if res.StatusCode != http.StatusOK {
+		return GetPageListResponse{}, fmt.Errorf("something went wrong while getting page list: statusCode = %v", res.StatusCode)
+	}
+
+	var resJson GetPageListResponse
+	err = json.NewDecoder(res.Body).Decode(&resJson)
+	if err != nil {
+		return GetPageListResponse{}, fmt.Errorf("failed to decode response: %w", err)
+	}
+
+	slog.Debug("successfully got page list")
+
+	return resJson, nil
 }
 
 // FetchPageContent fetches page content from WikiWiki's REST API.
