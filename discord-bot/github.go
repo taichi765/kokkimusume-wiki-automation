@@ -9,9 +9,7 @@ import (
 	"net/http"
 	"strings"
 
-	"github.com/bradleyfalzon/ghinstallation/v2"
 	"github.com/google/go-github/v88/github"
-	"github.com/taichi765/kokkimusume-wiki-automation/common"
 )
 
 const REPO_OWNER = "taichi765"

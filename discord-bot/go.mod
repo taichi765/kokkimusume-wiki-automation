@@ -15,7 +15,7 @@ require (
 	golang.org/x/tools v0.17.0 // indirect
 )
 
-replace github.com/taichi765/kokkimusume-wiki-automation/common => ../common/
+replace github.com/taichi765/kokkimusume-wiki-automation/types => ../types/
 
 require (
 	github.com/bradleyfalzon/ghinstallation/v2 v2.19.0

@@ -5,10 +5,10 @@ import (
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
-	"github.com/taichi765/kokkimusume-wiki-automation/common"
+	"github.com/taichi765/kokkimusume-wiki-automation/types"
 )
 
-var sampleCharaData = []common.CharacterData{
+var sampleCharaData = []types.CharacterData{
 	{
 		Name:                "日本",
 		Area:                "東アジア",
@@ -21,7 +21,7 @@ var sampleCharaData = []common.CharacterData{
 	},
 }
 
-var multipleAreasCharaData = []common.CharacterData{
+var multipleAreasCharaData = []types.CharacterData{
 	{
 		Name:                "日本",
 		Area:                "東アジア",
@@ -175,7 +175,7 @@ func TestGenerateCharaListPage(t *testing.T) {
 	testCases := []struct {
 		desc   string
 		old    string
-		charas []common.CharacterData
+		charas []types.CharacterData
 		expect string
 	}{
 		{
@@ -214,7 +214,7 @@ func TestGenerateMenuBar(t *testing.T) {
 	testCases := []struct {
 		desc   string
 		old    string
-		charas []common.CharacterData
+		charas []types.CharacterData
 		expect string
 	}{
 		{

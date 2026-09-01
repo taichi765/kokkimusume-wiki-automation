@@ -6,10 +6,10 @@ import (
 	"strings"
 	"text/template"
 
-	"github.com/taichi765/kokkimusume-wiki-automation/common"
+	"github.com/taichi765/kokkimusume-wiki-automation/types"
 )
 
-func generateCharaListPage(old string, charas []common.CharacterData) (string, error) {
+func generateCharaListPage(old string, charas []types.CharacterData) (string, error) {
 	beforeStart, afterEnd, err := splitLinesToEdit(old)
 	if err != nil {
 		return "", err
@@ -24,7 +24,7 @@ func generateCharaListPage(old string, charas []common.CharacterData) (string, e
 }
 
 // Part of [generateCharaListPage].
-func generateCharaListPageContent(charas []common.CharacterData) (string, error) {
+func generateCharaListPageContent(charas []types.CharacterData) (string, error) {
 	tmpl, err := template.New("table_item").Parse(
 		`|[[{{.Name}}]]|{{.Area}}|{{.FirstAppearenceDate}}|
 `)
@@ -46,7 +46,7 @@ func generateCharaListPageContent(charas []common.CharacterData) (string, error)
 	return b.String(), nil
 }
 
-func generateMenuBar(old string, charas []common.CharacterData) (string, error) {
+func generateMenuBar(old string, charas []types.CharacterData) (string, error) {
 	beforeStart, afterEnd, err := splitLinesToEdit(old)
 	if err != nil {
 		return "", err
@@ -58,10 +58,10 @@ func generateMenuBar(old string, charas []common.CharacterData) (string, error) 
 }
 
 // Part of [generateMenuBar].
-func generateMenuBarContent(charas []common.CharacterData) string {
+func generateMenuBarContent(charas []types.CharacterData) string {
 	byArea := charasByArea(charas)
 	b := &strings.Builder{}
-	for _, a := range common.ValidAreas {
+	for _, a := range types.ValidAreas {
 		chs := byArea[a]
 		fmt.Fprintf(b, "** %v\n", a)
 		for _, c := range chs {
@@ -71,13 +71,13 @@ func generateMenuBarContent(charas []common.CharacterData) string {
 	return b.String()
 }
 
-func charasByArea(charas []common.CharacterData) map[string][]common.CharacterData {
-	byArea := make(map[string][]common.CharacterData, len(common.ValidAreas))
+func charasByArea(charas []types.CharacterData) map[string][]types.CharacterData {
+	byArea := make(map[string][]types.CharacterData, len(types.ValidAreas))
 	for _, ch := range charas {
 		if charas, ok := byArea[ch.Area]; ok {
 			byArea[ch.Area] = append(charas, ch)
 		} else {
-			byArea[ch.Area] = []common.CharacterData{ch}
+			byArea[ch.Area] = []types.CharacterData{ch}
 		}
 	}
 	return byArea

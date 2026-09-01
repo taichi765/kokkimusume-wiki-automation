@@ -9,7 +9,6 @@ import (
 	"github.com/disgoorg/disgo/discord"
 	"github.com/disgoorg/disgo/handler"
 	"github.com/disgoorg/disgo/rest"
-	"github.com/taichi765/kokkimusume-wiki-automation/common"
 )
 
 var commands = []discord.ApplicationCommandCreate{
