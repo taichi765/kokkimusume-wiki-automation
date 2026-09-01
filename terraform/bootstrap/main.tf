@@ -71,3 +71,8 @@ resource "azurerm_resource_group" "detector" {
   name     = "deletion-detector"
   location = "Japan East"
 }
+
+resource "azurerm_resource_group" "acr" {
+  name     = "kokkimusume-acr"
+  location = "Japan East"
+}

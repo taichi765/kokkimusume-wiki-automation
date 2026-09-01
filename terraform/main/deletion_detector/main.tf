@@ -3,9 +3,12 @@ data "azurerm_resource_group" "detector" {
   name = "deletion-detector"
 }
 
+data "azurerm_client_config" "current" {
+
+}
 
 resource "azurerm_key_vault" "detector" {
-  name                = "kokkimusume-wiki-detector"
+  name                = "kokkimusume-detector"
   location            = data.azurerm_resource_group.detector.location
   resource_group_name = data.azurerm_resource_group.detector.name
   tenant_id           = data.azurerm_client_config.current.tenant_id
@@ -17,23 +20,23 @@ resource "azurerm_key_vault" "detector" {
 
 resource "azurerm_log_analytics_workspace" "detector" {
   name                = "deletion-detector-logs"
-  location            = azurerm_resource_group.detector.location
-  resource_group_name = azurerm_resource_group.detector.name
+  location            = data.azurerm_resource_group.detector.location
+  resource_group_name = data.azurerm_resource_group.detector.name
   sku                 = "PerGB2018"
   retention_in_days   = 30
 }
 
 resource "azurerm_container_app_environment" "detector" {
   name                       = "deletion-detector-env"
-  location                   = azurerm_resource_group.detector.location
-  resource_group_name        = azurerm_resource_group.detector.name
+  location                   = data.azurerm_resource_group.detector.location
+  resource_group_name        = data.azurerm_resource_group.detector.name
   log_analytics_workspace_id = azurerm_log_analytics_workspace.detector.id
 }
 
 resource "azurerm_container_app_job" "detector" {
   name                         = "deletion-detector"
-  location                     = azurerm_resource_group.detector.location
-  resource_group_name          = azurerm_resource_group.detector.name
+  location                     = data.azurerm_resource_group.detector.location
+  resource_group_name          = data.azurerm_resource_group.detector.name
   container_app_environment_id = azurerm_container_app_environment.detector.id
 
   replica_timeout_in_seconds = 10
@@ -68,7 +71,7 @@ resource "azurerm_container_app_job" "detector" {
 
   template {
     container {
-      image = "${azurerm_container_registry.acr.login_server}/deletion-detector:${var.commit_hash}"
+      image = "${var.acr_login_server}/deletion-detector:${var.commit_hash}"
       name  = "deletion-detector"
       readiness_probe {
         transport = "HTTP"

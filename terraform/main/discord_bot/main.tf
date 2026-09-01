@@ -2,6 +2,15 @@ data "azurerm_resource_group" "app" {
   name = "kokkimusume-discordbot-resources"
 }
 
+data "azurerm_client_config" "current" {
+
+}
+
+data "azurerm_container_registry" "acr" {
+  resource_group_name = var.acr_group_name
+  name                = var.acr_name
+}
+
 resource "azurerm_log_analytics_workspace" "app" {
   name                = "log-analytics-workspace"
   location            = data.azurerm_resource_group.app.location
@@ -41,7 +50,7 @@ resource "azurerm_container_app" "app" {
   }
 
   registry {
-    server   = var.acr_login_server
+    server   = data.azurerm_container_registry.acr.login_server
     identity = azurerm_user_assigned_identity.app.id
   }
 
@@ -74,7 +83,7 @@ resource "azurerm_container_app" "app" {
 
     container {
       name   = "container"
-      image  = "${azurerm_container_registry.acr.login_server}/discordbot:${var.commit_sha256}"
+      image  = "${data.azurerm_container_registry.acr.login_server}/discordbot:${var.commit_sha256}"
       cpu    = 0.25
       memory = "0.5Gi"
 

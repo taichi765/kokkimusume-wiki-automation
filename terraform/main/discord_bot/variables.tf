@@ -18,10 +18,10 @@ variable "discord-public-key" {
   type = string
 }
 
-variable "acr_id" {
+variable "acr_group_name" {
   type = string
 }
 
-variable "acr_login_server" {
+variable "acr_name" {
   type = string
 }

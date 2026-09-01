@@ -1,8 +1,12 @@
 
+data "azurerm_resource_group" "acr" {
+  name = "kokkimusume-acr"
+}
+
 resource "azurerm_container_registry" "acr" {
   name                = "kokkimusumeDiscordbotRegistry"
-  resource_group_name = data.azurerm_resource_group.app.name
-  location            = data.azurerm_resource_group.app.location
+  resource_group_name = data.azurerm_resource_group.acr.name
+  location            = data.azurerm_resource_group.acr.location
   sku                 = "Standard"
   admin_enabled       = false
 }
@@ -16,8 +20,8 @@ module "discord_bot" {
   discord-public-key     = var.discord-public-key
   commit_sha256          = var.commit_sha256
 
-  acr_id           = azurerm_container_registry.acr.id
-  acr_login_server = azurerm_container_registry.acr.login_server
+  acr_group_name = data.azurerm_resource_group.acr.name
+  acr_name       = azurerm_container_registry.acr.name
 }
 
 module "deletion_detector" {

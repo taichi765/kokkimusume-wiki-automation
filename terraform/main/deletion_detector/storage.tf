@@ -1,8 +1,8 @@
 
 resource "azurerm_storage_account" "detector" {
-  name                     = "detector-storage"
-  resource_group_name      = azurerm_resource_group.detector.name
-  location                 = azurerm_resource_group.detector.location
+  name                     = "detectorstorage"
+  resource_group_name      = data.azurerm_resource_group.detector.name
+  location                 = data.azurerm_resource_group.detector.location
   account_tier             = "Standard"
   account_replication_type = "LRS"
 }
