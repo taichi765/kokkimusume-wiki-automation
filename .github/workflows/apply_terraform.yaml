@@ -60,7 +60,7 @@ jobs:
       - name: Apply terraform
         run: |
           terraform apply -auto-approve -input=false -var="discord_bot_commit_hash=${{steps.discord-bot-tag.outputs.tag}}"\
-            -var="deletion_detector_commit_hash=${{steps.deletion-detector-tag.outputs.tag}}"
+            -var="deletion_detector_commit_hash=${{steps.deletion-detector-tag.outputs.tag}}"\
             -var="github-app-id=${{vars.GH_APP_ID}}"\
             -var="github-installation-id=${{vars.GH_INSTALLATION_ID}}"\
             -var="discord-app-id=${{vars.DISCORD_APP_ID}}"\
