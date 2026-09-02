@@ -41,7 +41,7 @@ jobs:
           subscription-id: ${{ vars.AZURE_SUBSCRIPTION_ID }}
       - name: Init terraform
         run: terraform init
-      - name: Get image tag
+      - name: Get Discord Bot's tag
         id: discord-bot-tag
         run: |
           if [ "${{inputs.update-discord-bot}}" = "true" ]; then
@@ -55,7 +55,7 @@ jobs:
           if [ "${{inputs.update-deletion-detector}}" = "true" ]; then
             echo "tag=${{github.sha}}" >> "$GITHUB_OUTPUT"
           else
-            echo "tag=${terraform output deletion_detector_latest_image_tag}" >> "$GITHUB_OUTPUT"
+            echo "tag=$(terraform output deletion_detector_latest_image_tag)" >> "$GITHUB_OUTPUT"
           fi
       - name: Apply terraform
         run: |
