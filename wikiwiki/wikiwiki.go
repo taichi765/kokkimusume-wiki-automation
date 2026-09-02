@@ -9,6 +9,7 @@ import (
 	"net/http"
 )
 
+// ApiEndpointBase is base url to send REST APIs to WikiWiki.
 const ApiEndpointBase = "https://api.wikiwiki.jp/kokkimusume"
 
 // AuthRequest is a request for `POST https://api.wikiwiki.jp/<wiki-name>/auth`
