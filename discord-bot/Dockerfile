@@ -5,7 +5,7 @@ ARG commitHash
 
 WORKDIR /build/
 COPY ./discord-bot/ ./discord-bot/
-COPY ./common ./common/
+COPY ./types/ ./types/
 RUN cd discord-bot&&CGO_ENABLED=0 go build -ldflags \
     "-X main.version=${version} -X main.commitHash=${commitHash}"
 

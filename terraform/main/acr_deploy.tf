@@ -30,7 +30,7 @@ resource "azuread_application_federated_identity_credential" "acr-deploy" {
 }
 
 resource "azurerm_role_assignment" "acr_push" {
-  scope                = azurerm_container_registry.acr.id
+  scope                = azurerm_container_registry.shared.id
   role_definition_name = "AcrPush"
   principal_id         = azuread_service_principal.acr-deploy.object_id
 }

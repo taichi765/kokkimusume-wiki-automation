@@ -1,0 +1,39 @@
+name: Deploy Discord Bot
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        type: string
+        description: "version of discord bot: vX.Y.Z"
+  workflow_call:
+    inputs:
+      version:
+        type: string
+        description: "version of discord bot: vX.Y.Z"
+
+permissions:
+  id-token: write
+  contents: read
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          sparse-checkout: |
+            discord-bot/
+            types/
+      - uses: azure/login@v3
+        with:
+          client-id: ${{ vars.AZURE_DEPLOY_BOT_CLIENT_ID }}
+          tenant-id: ${{ vars.AZURE_TENANT_ID }}
+          subscription-id: ${{ vars.AZURE_SUBSCRIPTION_ID }}
+      - name: Login to ACR
+        run: az acr login --name kokkimusumeDiscordbotRegistry
+      - name: Build and push
+        run: |
+          TAG=kokkimusumediscordbotregistry.azurecr.io/discordbot:${{github.sha}}
+          docker build -t $TAG --build-arg version=${{inputs.version}}\
+            --build-arg commitHash=${{github.sha}} -f ./discord-bot/Dockerfile .
+          docker push $TAG

@@ -9,3 +9,7 @@ variable "acr_login_server" {
 variable "commit_hash" {
   type = string
 }
+
+variable "container_app_environment_id" {
+  type = string
+}

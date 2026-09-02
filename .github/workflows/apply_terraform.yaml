@@ -2,16 +2,24 @@ name: terraform apply
 on:
   workflow_call:
     inputs:
-      update-image:
+      update-discord-bot:
         type: boolean
         default: true
-        description: "Whether to update container image or not"
+        description: "Whether to update discord bot's image or not"
+      update-deletion-detector:
+        type: boolean
+        default: true
+        description: "Whether to update deletion detector's image or not"
   workflow_dispatch:
     inputs:
-      update-image:
+      update-discord-bot:
         type: boolean
         default: true
-        description: "Whether to update container image or not"
+        description: "Whether to update discord bot's image or not"
+      update-deletion-detector:
+        type: boolean
+        default: true
+        description: "Whether to update deletion detector's image or not"
 
 permissions:
   id-token: write
@@ -34,16 +42,25 @@ jobs:
       - name: Init terraform
         run: terraform init
       - name: Get image tag
-        id: image-tag
+        id: discord-bot-tag
         run: |
-          if [ "${{inputs.update-image}}" = "true" ]; then
-            echo "image-tag=${{github.sha}}" >> "$GITHUB_OUTPUT"
+          if [ "${{inputs.update-discord-bot}}" = "true" ]; then
+            echo "tag=${{github.sha}}" >> "$GITHUB_OUTPUT"
           else
-            echo "image-tag=$(terraform output latest_image_tag)" >> "$GITHUB_OUTPUT"
+            echo "tag=$(terraform output discord_bot_latest_image_tag)" >> "$GITHUB_OUTPUT"
+          fi
+      - name: Get Deletion Detector's tag
+        id: deletion-detector-tag
+        run: |
+          if [ "${{inputs.update-deletion-detector}}" = "true" ]; then
+            echo "tag=${{github.sha}}" >> "$GITHUB_OUTPUT"
+          else
+            echo "tag=${terraform output deletion_detector_latest_image_tag}" >> "$GITHUB_OUTPUT"
           fi
       - name: Apply terraform
         run: |
-          terraform apply -auto-approve -input=false -var="commit_sha256=${{steps.image-tag.outputs.image-tag}}"\
+          terraform apply -auto-approve -input=false -var="discord_bot_commit_hash=${{steps.discord-bot-tag.outputs.tag}}"\
+            -var="deletion_detector_commit_hash=${{steps.deletion-detector-tag.outputs.tag}}"
             -var="github-app-id=${{vars.GH_APP_ID}}"\
             -var="github-installation-id=${{vars.GH_INSTALLATION_ID}}"\
             -var="discord-app-id=${{vars.DISCORD_APP_ID}}"\

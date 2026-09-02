@@ -11,13 +11,6 @@ data "azurerm_container_registry" "acr" {
   name                = var.acr_name
 }
 
-resource "azurerm_log_analytics_workspace" "app" {
-  name                = "log-analytics-workspace"
-  location            = data.azurerm_resource_group.app.location
-  resource_group_name = data.azurerm_resource_group.app.name
-  sku                 = "PerGB2018"
-  retention_in_days   = 30
-}
 
 resource "azurerm_key_vault" "app" {
   name                = "kdb-key-vault"
@@ -29,18 +22,10 @@ resource "azurerm_key_vault" "app" {
   rbac_authorization_enabled = true
 }
 
-resource "azurerm_container_app_environment" "app" {
-  name                       = "app-env"
-  location                   = data.azurerm_resource_group.app.location
-  resource_group_name        = data.azurerm_resource_group.app.name
-  log_analytics_workspace_id = azurerm_log_analytics_workspace.app.id
-  logs_destination           = "log-analytics"
-  #logs_destination           = "azure-monitor"
-}
 
 resource "azurerm_container_app" "app" {
   name                         = "app"
-  container_app_environment_id = azurerm_container_app_environment.app.id
+  container_app_environment_id = var.container_app_environment_id
   resource_group_name          = data.azurerm_resource_group.app.name
   revision_mode                = "Single"
 
@@ -135,15 +120,5 @@ resource "azurerm_container_app" "app" {
         secret_name = "discord-token"
       }
     }
-  }
-}
-
-resource "azurerm_monitor_diagnostic_setting" "containerapp" {
-  name                       = "containerapp"
-  target_resource_id         = azurerm_container_app_environment.app.id
-  log_analytics_workspace_id = azurerm_log_analytics_workspace.app.id
-
-  enabled_log {
-    category = "ContainerAppHTTPLogs"
   }
 }

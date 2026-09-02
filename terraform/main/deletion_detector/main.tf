@@ -26,18 +26,11 @@ resource "azurerm_log_analytics_workspace" "detector" {
   retention_in_days   = 30
 }
 
-resource "azurerm_container_app_environment" "detector" {
-  name                       = "deletion-detector-env"
-  location                   = data.azurerm_resource_group.detector.location
-  resource_group_name        = data.azurerm_resource_group.detector.name
-  log_analytics_workspace_id = azurerm_log_analytics_workspace.detector.id
-}
-
 resource "azurerm_container_app_job" "detector" {
   name                         = "deletion-detector"
   location                     = data.azurerm_resource_group.detector.location
   resource_group_name          = data.azurerm_resource_group.detector.name
-  container_app_environment_id = azurerm_container_app_environment.detector.id
+  container_app_environment_id = var.container_app_environment_id
 
   replica_timeout_in_seconds = 10
   replica_retry_limit        = 5

@@ -1,15 +1,7 @@
-name: Deploy Image
+name: Deploy Deletion Detector
 on:
   workflow_dispatch:
-    inputs:
-      version:
-        type: string
-        description: "version of discord bot: vX.Y.Z"
   workflow_call:
-    inputs:
-      version:
-        type: string
-        description: "version of discord bot: vX.Y.Z"
 
 permissions:
   id-token: write
@@ -22,8 +14,8 @@ jobs:
       - uses: actions/checkout@v7
         with:
           sparse-checkout: |
-            discord-bot/
-            common/
+            deletion-detector/
+            wikiwiki/
       - uses: azure/login@v3
         with:
           client-id: ${{ vars.AZURE_DEPLOY_BOT_CLIENT_ID }}
@@ -33,7 +25,6 @@ jobs:
         run: az acr login --name kokkimusumeDiscordbotRegistry
       - name: Build and push
         run: |
-          TAG=kokkimusumediscordbotregistry.azurecr.io/discordbot:${{github.sha}}
-          docker build -t $TAG --build-arg version=${{inputs.version}}\
-            --build-arg commitHash=${{github.sha}} -f ./discord-bot/Dockerfile .
+          TAG=kokkimusumediscordbotregistry.azurecr.io/deletion-detector:${{github.sha}}
+          docker build -t $TAG -f ./deletion-detector/Dockerfile .
           docker push $TAG

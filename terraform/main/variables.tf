@@ -1,4 +1,8 @@
-variable "commit_sha256" {
+variable "discord_bot_commit_hash" {
+  type = string
+}
+
+variable "deletion_detector_commit_hash" {
   type = string
 }
 

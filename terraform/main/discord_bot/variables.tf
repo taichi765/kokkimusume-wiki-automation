@@ -25,3 +25,7 @@ variable "acr_group_name" {
 variable "acr_name" {
   type = string
 }
+
+variable "container_app_environment_id" {
+  type = string
+}

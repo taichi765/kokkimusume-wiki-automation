@@ -27,19 +27,24 @@ jobs:
           TAG=$(git describe --tags --abbrev=0 --match "discord-bot/**")
           echo "version=${TAG#discord-bot/}" >> "$GITHUB_OUTPUT"
 
-  deploy-image:
+  deploy-discord-bot:
     needs: [ci,get-version]
     if: ${{ needs.ci.outputs.discord-bot-success == 'true' }}
-    uses: ./.github/workflows/deploy_image.yaml
+    uses: ./.github/workflows/deploy_discord_bot.yaml
     with:
       version: ${{ needs.get-version.outputs.version }} #TODO: dummy
+
+  deploy-deletion-detector:
+    needs: ci
+    if: ${{ needs.ci.outputs.deletion-detector-success == 'true' }}
+    uses: ./.github/workflows/deploy_deletion_detector.yaml
 
   apply-terraform:
     needs: ci
     if: ${{ needs.ci.outputs.terraform-success == 'true' }}
     uses: ./.github/workflows/apply_terraform.yaml
     with:
-      update-image: ${{ needs.ci.outputs.update-image == 'true' }}
+      update-discord-bot: ${{ needs.ci.outputs.discord-bot-success == 'true' }}
   
   update-page:
     needs: ci

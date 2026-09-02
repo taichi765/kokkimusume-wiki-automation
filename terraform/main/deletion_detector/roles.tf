@@ -1,6 +1,6 @@
 
 resource "azurerm_user_assigned_identity" "detector" {
-  name                = "kokkimusume-discortbot-identity"
+  name                = "kokkimusume-deletion-detector-identity"
   location            = data.azurerm_resource_group.detector.location
   resource_group_name = data.azurerm_resource_group.detector.name
 }

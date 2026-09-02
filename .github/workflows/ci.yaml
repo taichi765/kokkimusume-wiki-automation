@@ -8,11 +8,10 @@ on:
         value: ${{ jobs.page-updater-check.result == 'success' }}
       discord-bot-success:
         value: ${{ jobs.discord-bot-check.result == 'success' }}
+      deletion-detector-success:
+        value: ${{ jobs.deletion-detector-check.result == 'success' }}
       terraform-success:
         value: ${{ jobs.terraform-check.result == 'success' }}
-      update-image:
-        description: "whether container image should be updated or not"
-        value: ${{ jobs.paths-filter.outputs.terraform-image-only == 'true' || jobs.paths-filter.outputs.terraform-both == 'true' }}
 
 jobs:
   paths-filter:
@@ -58,17 +57,32 @@ jobs:
             cache-dependency-path: ./discord-bot/go.sum
       - name: Run tests
         run: go test
+
+  deletion-detector-check:
+    runs-on: ubuntu-latest
+    needs: paths-filter
+    if: ${{ needs.paths-filter.outputs.deletion-detector == 'true' }}
+    defaults:
+      run:
+        working-directory: deletion-detector/
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          sparse-checkout: |
+            deletion-detector/
+            wikiwiki/
+      - uses: actions/setup-go@v7
+        with:
+          go-version-file: ./deletion-detector/go.mod
+          cache-dependency-path: ./deletion-detector/go.sum
+      - name: Run tests
+        run: go test
   
   terraform-check:
     runs-on: ubuntu-latest
     needs: paths-filter
-    if: ${{ needs.paths-filter.outputs.terraform-both == 'true' || needs.paths-filter.outputs.terraform-image-only == 'true' || needs.paths-filter.outputs.terraform-infra-only == 'true' }}
+    if: ${{ needs.paths-filter.outputs.terraform == 'true' }}
     steps:
-      - name: debug
-        run: |
-          echo "terraform-both = ${{needs.paths-filter.outputs.terraform-both}}"
-          echo "terraform-image-only = ${{needs.paths-filter.outputs.terraform-image-only}}"
-          echo "terraform-infra-only = ${{needs.paths-filter.outputs.terraform-infra-only}}"
       - uses: actions/checkout@v7
         with:
           sparse-checkout: |

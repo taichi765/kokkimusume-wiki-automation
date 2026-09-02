@@ -1,6 +1,6 @@
 
 resource "azurerm_storage_account" "detector" {
-  name                     = "detectorstorage"
+  name                     = "kokkimusumedetector"
   resource_group_name      = data.azurerm_resource_group.detector.name
   location                 = data.azurerm_resource_group.detector.location
   account_tier             = "Standard"

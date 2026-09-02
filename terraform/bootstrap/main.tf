@@ -72,7 +72,7 @@ resource "azurerm_resource_group" "detector" {
   location = "Japan East"
 }
 
-resource "azurerm_resource_group" "acr" {
-  name     = "kokkimusume-acr"
+resource "azurerm_resource_group" "shared" {
+  name     = "kokkimusume-shared"
   location = "Japan East"
 }

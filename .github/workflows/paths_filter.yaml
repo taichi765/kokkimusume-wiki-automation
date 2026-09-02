@@ -6,33 +6,33 @@ on:
         value: ${{ jobs.paths-filter.outputs.page-updater }}
       discord-bot:
         value: ${{ jobs.paths-filter.outputs.discord-bot }}
-      terraform-image-only:
-        value: ${{ jobs.paths-filter.outputs.terraform-image-only }}
-      terraform-infra-only:
-        value: ${{ jobs.paths-filter.outputs.terraform-infra-only }}
-      terraform-both:
-        value: ${{ jobs.paths-filter.outputs.terraform-both }}
-
+      deletion-detector:
+        value: ${{ jobs.paths-filter.outputs.deletion-detector }}
+      terraform:
+        value: ${{ jobs.paths-filter.outputs.terraform }}
 jobs:
   paths-filter:
     runs-on: ubuntu-latest
     outputs:
-      page-updater: ${{ steps.filter.outputs.page-updater == 'true' || steps.filter.outputs.go-common == 'true' }}
-      discord-bot: ${{ steps.filter.outputs.discord-bot == 'true' || steps.filter.outputs.go-common == 'true' }}
-      terraform-image-only: ${{ steps.filter.outputs.infra == 'false' && (steps.filter.outputs.discord-bot == 'true' || steps.filter.outputs.go-common == 'true') }}  
-      terraform-infra-only: ${{ steps.filter.outputs.infra == 'true' && (steps.filter.outputs.discord-bot == 'false' && steps.filter.outputs.go-common == 'false') }}  
-      terraform-both: ${{ steps.filter.outputs.infra=='true' && (steps.filter.outputs.discord-bot == 'true' || steps.filter.outputs.go-common == 'true') }}
+      page-updater: ${{ steps.filter.outputs.page-updater == 'true' }}
+      discord-bot: ${{ steps.filter.outputs.discord-bot == 'true' }}
+      deletion-detector: ${{ steps.filter.outputs.deletion-detector == 'true' }}
+      terraform: ${{ steps.filter.outputs.terraform == 'true' }}  
     steps:
       - uses: actions/checkout@v7
       - uses: dorny/paths-filter@ceb8a2b8f2d89434be7ff52d3de7ec3738c5cc9d
         id: filter
         with:
           filters: |
-            go-common:
-              - 'common/**'
             page-updater:
               - 'page-updater/**'
+              - 'types/**'
+              - 'wikiwiki/**'
             discord-bot:
               - 'discord-bot/**'
-            infra:
+              - 'types/**'
+            terraform:
               - 'terraform/**'
+            deletion-detector:
+              - 'deletion-detector/**'
+              - 'wikiwiki/**'
