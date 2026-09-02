@@ -53,7 +53,8 @@ type PutPageResponse struct {
 // Client is HTTP client for wikiwiki's REST API.
 type Client struct {
 	http *http.Client
-	tok  string
+	// Token acquired from [GetAuthToken].
+	tok string
 }
 
 // NewClient creates new client using password.
