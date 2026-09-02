@@ -41,10 +41,11 @@ jobs:
 
   apply-terraform:
     needs: ci
-    if: ${{ needs.ci.outputs.terraform-success == 'true' }}
+    if: ${{ needs.ci.outputs.terraform-success == 'true' || needs.ci.outputs.discord-bot-success == 'true' || needs.ci.outputs.deletion-detector-success == 'true' }}
     uses: ./.github/workflows/apply_terraform.yaml
     with:
       update-discord-bot: ${{ needs.ci.outputs.discord-bot-success == 'true' }}
+      update-deletion-detector: ${{ needs.ci.outputs.deletion-detector-success == 'true' }}
   
   update-page:
     needs: ci
