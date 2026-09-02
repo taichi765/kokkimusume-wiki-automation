@@ -33,26 +33,24 @@ resource "azuread_application_federated_identity_credential" "gh-actions-apply" 
 }
 
 resource "azurerm_role_assignment" "contributor" {
-  scope                = azurerm_resource_group.app.id
+  for_each = toset([ azurerm_resource_group.app.id, azurerm_resource_group.detector.id, azurerm_resource_group.shared.id ])
+
+  scope                = each.value
   role_definition_name = "Contributor"
   principal_id         = azuread_service_principal.gh-actions-apply.object_id
 }
 
-resource "azurerm_role_assignment" "detector_contributor" {
-  scope                = azurerm_resource_group.detector.id
-  role_definition_name = "Contributor"
+resource "azurerm_role_assignment" "role_admin" {
+  for_each = toset([ azurerm_resource_group.app.id, azurerm_resource_group.detector.id, azurerm_resource_group.shared.id ])
+
+  scope                = each.value
+  role_definition_name = "User Access Administrator"
   principal_id         = azuread_service_principal.gh-actions-apply.object_id
 }
 
 resource "azurerm_role_assignment" "storage" {
   scope                = data.azurerm_storage_account.backend.id
   role_definition_name = "Storage Blob Data Contributor"
-  principal_id         = azuread_service_principal.gh-actions-apply.object_id
-}
-
-resource "azurerm_role_assignment" "role_admin" {
-  scope                = azurerm_resource_group.app.id
-  role_definition_name = "User Access Administrator"
   principal_id         = azuread_service_principal.gh-actions-apply.object_id
 }
 
