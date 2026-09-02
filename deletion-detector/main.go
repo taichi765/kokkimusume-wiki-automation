@@ -6,7 +6,6 @@ import (
 	"errors"
 	"fmt"
 	"log/slog"
-	"net/http"
 	"os"
 	"slices"
 	"time"
@@ -49,16 +48,14 @@ func runMain() int {
 	}
 
 	// WikiWiki
-	tok, err := wikiwiki.GetAuthToken(envVars.wikiwikiPassword)
+	wc, err := wikiwiki.NewClient(envVars.wikiwikiPassword)
 	if err != nil {
-		slog.Error("failed to get token", slog.Any("err", err))
+		slog.Error("failed to create wikiwiki client", slog.Any("err", err))
 		return 1
 	}
-	slog.Info("successfully got token")
+	slog.Debug("succeed to create wikiwiki client")
 
-	c := &http.Client{}
-
-	curr, err := wikiwiki.GetPageList(c, tok)
+	curr, err := wc.GetPageList()
 	if err != nil {
 		slog.Error("failed to get the list of pages", slog.Any("err", err))
 		return 1

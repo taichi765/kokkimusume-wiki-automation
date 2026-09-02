@@ -50,6 +50,24 @@ type PutPageResponse struct {
 	Status string `json:"status"`
 }
 
+type Client struct {
+	http *http.Client
+	tok  string
+}
+
+// NewClient creates new client using password.
+func NewClient(passwd string) (*Client, error) {
+	tok, err := GetAuthToken(passwd)
+	if err != nil {
+		return nil, err
+	}
+
+	return &Client{
+		http: &http.Client{},
+		tok:  tok,
+	}, nil
+}
+
 // GetAuthToken gets token from wikiwiki's REST API.
 func GetAuthToken(passwd string) (string, error) {
 	body, err := json.Marshal(AuthRequest{
@@ -89,7 +107,7 @@ func GetAuthToken(passwd string) (string, error) {
 }
 
 // GetPageList gets the list of pages from wikiwiki.
-func GetPageList(c *http.Client, tok string) (GetPageListResponse, error) {
+func (c *Client) GetPageList() (GetPageListResponse, error) {
 	slog.Debug("getting page list")
 
 	endpoint := ApiEndpointBase + "/pages"
@@ -97,9 +115,9 @@ func GetPageList(c *http.Client, tok string) (GetPageListResponse, error) {
 	if err != nil {
 		panic("request must be valid")
 	}
-	req.Header.Add("Authorizarion", "Bearer "+tok)
+	req.Header.Add("Authorizarion", "Bearer "+c.tok)
 
-	res, err := c.Do(req)
+	res, err := c.http.Do(req)
 	if err != nil {
 		return GetPageListResponse{}, err
 	}
@@ -125,7 +143,7 @@ func GetPageList(c *http.Client, tok string) (GetPageListResponse, error) {
 }
 
 // FetchPageContent fetches page content from WikiWiki's REST API.
-func FetchPageContent(c *http.Client, page string, tok string) (string, error) {
+func (c *Client) FetchPageContent(page string) (string, error) {
 	slog.Debug("fetching page content", slog.String("page", page))
 
 	endpoint := ApiEndpointBase + "/page/" + page
@@ -133,9 +151,9 @@ func FetchPageContent(c *http.Client, page string, tok string) (string, error) {
 	if err != nil {
 		panic("request must be valid")
 	}
-	req.Header.Add("Authorization", "Bearer "+tok)
+	req.Header.Add("Authorization", "Bearer "+c.tok)
 
-	res, err := c.Do(req)
+	res, err := c.http.Do(req)
 	if err != nil {
 		return "", fmt.Errorf("failed to fetch page content: %w", err)
 	}
@@ -161,7 +179,7 @@ func FetchPageContent(c *http.Client, page string, tok string) (string, error) {
 }
 
 // UpdatePageContent updates page content using WikiWiki's REST API.
-func UpdatePageContent(c *http.Client, page string, content string, tok string) error {
+func (c *Client) UpdatePageContent(page string, content string) error {
 	slog.Debug("updating page content", slog.String("page", page))
 
 	endpoint := ApiEndpointBase + "/page/" + page
@@ -176,10 +194,10 @@ func UpdatePageContent(c *http.Client, page string, content string, tok string) 
 	if err != nil {
 		panic("request must be valid")
 	}
-	req.Header.Add("Authorization", "Bearer "+tok)
+	req.Header.Add("Authorization", "Bearer "+c.tok)
 	req.Header.Add("Content-Type", "application/json")
 
-	res, err := c.Do(req)
+	res, err := c.http.Do(req)
 	if err != nil {
 		return fmt.Errorf("failed to update content: %w", err)
 	}

@@ -3,7 +3,6 @@ package main
 import (
 	"fmt"
 	"log/slog"
-	"net/http"
 	"os"
 
 	"github.com/joho/godotenv"
@@ -32,22 +31,19 @@ func runMain() int {
 		return 1
 	}
 
-	tok, err := wikiwiki.GetAuthToken(passwd)
+	wc, err := wikiwiki.NewClient(passwd)
 	if err != nil {
-		slog.Error("failed to get token", slog.Any("err", err))
+		slog.Error("failed to create wikiwiki client", slog.Any("err", err))
 		return 1
 	}
-	slog.Info("successfully got token")
 
-	c := &http.Client{}
-
-	charaListSrc, err := wikiwiki.FetchPageContent(c, "キャラ一覧", tok)
+	charaListSrc, err := wc.FetchPageContent("キャラ一覧")
 	if err != nil {
 		slog.Error("failed to fetch character list page content", slog.Any("err", err))
 		return 1
 	}
 
-	menubarSrc, err := wikiwiki.FetchPageContent(c, "MenuBar", tok)
+	menubarSrc, err := wc.FetchPageContent("MenuBar")
 	if err != nil {
 		slog.Error("failed to fetch MenuBar content", slog.Any("err", err))
 		return 1
@@ -64,12 +60,12 @@ func runMain() int {
 		return 1
 	}
 
-	if err := wikiwiki.UpdatePageContent(c, "キャラ一覧", newCharaListSrc, tok); err != nil {
+	if err := wc.UpdatePageContent("キャラ一覧", newCharaListSrc); err != nil {
 		slog.Error("failed to update chara list page", slog.Any("err", err))
 		return 1
 	}
 
-	if err := wikiwiki.UpdatePageContent(c, "MenuBar", newMenubarSrc, tok); err != nil {
+	if err := wc.UpdatePageContent("MenuBar", newMenubarSrc); err != nil {
 		slog.Error("failed to update MenuBar", slog.Any("err", err))
 		return 1
 	}
