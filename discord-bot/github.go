@@ -18,7 +18,7 @@ const REPO_OWNER = "taichi765"
 const REPO_NAME = "kokkimusume-wiki-automation"
 const CHARA_CSV_PATH = "data/charas.csv"
 
-// Error returned from [updateCsv].
+// CharaAkreadyExistsError is an error returned from [updateCsv].
 type CharaAlreadyExistsError struct {
 	Name string
 }
@@ -27,6 +27,7 @@ func (e *CharaAlreadyExistsError) Error() string {
 	return fmt.Sprintf("charater %s already exists", e.Name)
 }
 
+// updateCsb updates CSV file via Github's REST API.
 func updateCsv(chara types.CharacterData, c *github.Client) error {
 	content, err := getCsvContent(c)
 	if err != nil {
@@ -86,6 +87,7 @@ func getCsvContent(c *github.Client) (*github.RepositoryContent, error) {
 	return content, nil
 }
 
+// newClient created authenticated [github.Client].
 func newClient(appId, installationId int64, privateKey []byte) (*github.Client, error) {
 	itr, err := ghinstallation.New(http.DefaultTransport, appId, installationId, privateKey)
 	if err != nil {

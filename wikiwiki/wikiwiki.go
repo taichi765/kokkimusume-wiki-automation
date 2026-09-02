@@ -50,6 +50,7 @@ type PutPageResponse struct {
 	Status string `json:"status"`
 }
 
+// Client is HTTP client for wikiwiki's REST API.
 type Client struct {
 	http *http.Client
 	tok  string
