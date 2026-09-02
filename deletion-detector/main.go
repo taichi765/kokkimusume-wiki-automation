@@ -33,6 +33,11 @@ type EnvVars struct {
 }
 
 func main() {
+	l := slog.New(slog.NewJSONHandler(os.Stdout, &slog.HandlerOptions{
+		Level:     slog.LevelDebug,
+		AddSource: true,
+	}))
+	slog.SetDefault(l)
 	os.Exit(runMain())
 }
 
