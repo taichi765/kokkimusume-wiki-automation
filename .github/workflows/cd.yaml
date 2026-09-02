@@ -40,7 +40,7 @@ jobs:
     uses: ./.github/workflows/deploy_deletion_detector.yaml
 
   apply-terraform:
-    needs: ci
+    needs: [ci, deploy-discord-bot, deploy-deletion-detector]
     if: ${{ needs.ci.outputs.terraform-success == 'true' || needs.ci.outputs.discord-bot-success == 'true' || needs.ci.outputs.deletion-detector-success == 'true' }}
     uses: ./.github/workflows/apply_terraform.yaml
     with:
