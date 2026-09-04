@@ -19,8 +19,8 @@ import (
 	"github.com/taichi765/kokkimusume-wiki-automation/wikiwiki"
 )
 
-const azureBlobStorageUrl = "TODO"
-const azureBlobContainerName = "TODO"
+const azureBlobStorageUrl = "https://kokkimusumedetector.blob.core.windows.net"
+const azureBlobContainerName = "page-list"
 
 const deletedThreshould = 5
 
