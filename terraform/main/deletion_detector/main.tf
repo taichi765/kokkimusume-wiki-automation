@@ -32,7 +32,7 @@ resource "azurerm_container_app_job" "detector" {
   resource_group_name          = data.azurerm_resource_group.detector.name
   container_app_environment_id = var.container_app_environment_id
 
-  replica_timeout_in_seconds = 10
+  replica_timeout_in_seconds = 60
   replica_retry_limit        = 5
 
   identity {
