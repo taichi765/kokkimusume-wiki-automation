@@ -41,7 +41,7 @@ jobs:
 
   apply-terraform:
     needs: [ci, deploy-discord-bot, deploy-deletion-detector]
-    if: ${{ needs.ci.outputs.terraform-success == 'true' || needs.ci.outputs.discord-bot-success == 'true' || needs.ci.outputs.deletion-detector-success == 'true' }}
+    if: ${{ always() && needs.ci.result == 'success' && (needs.ci.outputs.terraform-non-failure == 'true') }}
     uses: ./.github/workflows/apply_terraform.yaml
     with:
       update-discord-bot: ${{ needs.ci.outputs.discord-bot-success == 'true' }}

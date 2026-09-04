@@ -12,6 +12,8 @@ on:
         value: ${{ jobs.deletion-detector-check.result == 'success' }}
       terraform-success:
         value: ${{ jobs.terraform-check.result == 'success' }}
+      terraform-non-failure:
+        value: ${{ jobs.terraform-check.result == 'success' || jobs.terraform-check.result == 'skipped' }}
 
 jobs:
   paths-filter:
