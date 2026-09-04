@@ -109,6 +109,18 @@ func GetAuthToken(passwd string) (string, error) {
 	return resJson.Token, nil
 }
 
+// DoWithAuth wraps [(http.Client).Do] with 'Authorization' header.
+func (c *Client) DoWithAuth(req *http.Request) (*http.Response, error) {
+	req.Header.Add("Authorization", "Bearer "+c.tok)
+
+	res, err := c.http.Do(req)
+	if err != nil {
+		return nil, err
+	}
+
+	return res, nil
+}
+
 // GetPageList gets the list of pages from wikiwiki.
 func (c *Client) GetPageList() (GetPageListResponse, error) {
 	slog.Debug("getting page list")
@@ -118,9 +130,8 @@ func (c *Client) GetPageList() (GetPageListResponse, error) {
 	if err != nil {
 		panic("request must be valid")
 	}
-	req.Header.Add("Authorizarion", "Bearer "+c.tok)
 
-	res, err := c.http.Do(req)
+	res, err := c.DoWithAuth(req)
 	if err != nil {
 		return GetPageListResponse{}, err
 	}
@@ -154,9 +165,8 @@ func (c *Client) FetchPageContent(page string) (string, error) {
 	if err != nil {
 		panic("request must be valid")
 	}
-	req.Header.Add("Authorization", "Bearer "+c.tok)
 
-	res, err := c.http.Do(req)
+	res, err := c.DoWithAuth(req)
 	if err != nil {
 		return "", fmt.Errorf("failed to fetch page content: %w", err)
 	}
@@ -197,10 +207,9 @@ func (c *Client) UpdatePageContent(page string, content string) error {
 	if err != nil {
 		panic("request must be valid")
 	}
-	req.Header.Add("Authorization", "Bearer "+c.tok)
 	req.Header.Add("Content-Type", "application/json")
 
-	res, err := c.http.Do(req)
+	res, err := c.DoWithAuth(req)
 	if err != nil {
 		return fmt.Errorf("failed to update content: %w", err)
 	}
