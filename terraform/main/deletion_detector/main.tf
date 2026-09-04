@@ -98,6 +98,11 @@ resource "azurerm_container_app_job" "detector" {
         secret_name = "wikiwiki-password"
       }
 
+      env {
+        name = "AZURE_CLIENT_ID"
+        value = azurerm_user_assigned_identity.detector.id
+      }
+
       cpu    = 0.5
       memory = "1Gi"
     }
