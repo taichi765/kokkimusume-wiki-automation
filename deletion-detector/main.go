@@ -26,6 +26,8 @@ const deletedThreshould = 5
 
 const discordNotifyChanel = "1537321425944191006"
 
+var errNoPreviousPages = errors.New("there was no previous pages in the storage")
+
 type EnvVars struct {
 	discordToken     string
 	wikiwikiPassword string
@@ -75,7 +77,16 @@ func runMain() int {
 		return 1
 	}
 
+	if err := uploadPageList(client, curr); err != nil {
+		slog.Error("failed to upload latest page list", slog.Any("err", err))
+		return 1
+	}
+
 	prev, err := getPreviousPageList(client)
+	if err == errNoPreviousPages {
+		slog.Warn("there was no previously fetched pages: doing nothing")
+		return 0
+	}
 	if err != nil {
 		slog.Error("failed to get previous page list", slog.Any("err", err))
 		return 1
@@ -89,11 +100,6 @@ func runMain() int {
 			slog.Error("failed to notify via discord", slog.Any("err", err))
 			return 1
 		}
-	}
-
-	if err := uploadPageList(client, curr); err != nil {
-		slog.Error("failed to upload latest page list", slog.Any("err", err))
-		return 1
 	}
 
 	return 0
@@ -138,6 +144,9 @@ func loadEnvVars() (*EnvVars, error) {
 	}, nil
 }
 
+// getPreviousPageList searches the storage for the previously fetched list of pages.
+//
+// Returns [errNoPreviousPages] when it couldn't be found.
 func getPreviousPageList(c *azblob.Client) (wikiwiki.GetPageListResponse, error) {
 	pager := c.NewListBlobsFlatPager(azureBlobContainerName, nil)
 	var times []time.Time
@@ -155,6 +164,10 @@ func getPreviousPageList(c *azblob.Client) (wikiwiki.GetPageListResponse, error)
 			}
 			times = append(times, time)
 		}
+	}
+
+	if len(times) == 0 {
+		return wikiwiki.GetPageListResponse{}, errNoPreviousPages
 	}
 
 	slices.SortFunc(times, func(a, b time.Time) int {
@@ -193,6 +206,8 @@ func uploadPageList(c *azblob.Client, pages wikiwiki.GetPageListResponse) error 
 	if err != nil {
 		return fmt.Errorf("failed to upload page list: %w", err)
 	}
+
+	slog.Debug("successfully uploaded page list")
 
 	return nil
 }
