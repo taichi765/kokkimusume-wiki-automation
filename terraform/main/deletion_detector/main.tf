@@ -57,9 +57,13 @@ resource "azurerm_container_app_job" "detector" {
     identity            = azurerm_user_assigned_identity.detector.id
   }
 
-  schedule_trigger_config {
+  #schedule_trigger_config {
     # 一時間に一回
-    cron_expression = "0 */1 * * *"
+  #  cron_expression = "0 */1 * * *"
+  #}
+
+  manual_trigger_config {
+    
   }
 
   template {
