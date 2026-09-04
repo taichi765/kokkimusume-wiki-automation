@@ -20,7 +20,8 @@
       devShells.${system}.default =  pkgs.mkShell {
         buildInputs = [
           pkgs.go
-          (with pkgs.azure-cli; withExtensions [ extensions.log-analytics ])
+          # Use system-installed Azure CLI because nixpkgs' one is not latest and extension can't be installed successfully.
+          #(with pkgs.azure-cli; withExtensions [ extensions.log-analytics ])
           pkgs.terraform
           pkgs.just
         ];
