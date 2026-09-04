@@ -100,7 +100,7 @@ resource "azurerm_container_app_job" "detector" {
 
       env {
         name = "AZURE_CLIENT_ID"
-        value = azurerm_user_assigned_identity.detector.id
+        value = azurerm_user_assigned_identity.detector.client_id
       }
 
       cpu    = 0.5
