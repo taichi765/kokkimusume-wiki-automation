@@ -16,7 +16,8 @@ jobs:
           sparse-checkout: |
             deletion-detector/
             wikiwiki/
-      - uses: azure/login@487024fc392f1f60cc70bc8a48233c14bc1de77f
+      # azure/login's latest commit on master doesn't include lib/main/index.js
+      - uses: azure/login@a641126d1b8aa4d1fa005f4f92df94a3a4c4c906
         with:
           client-id: ${{ vars.AZURE_DEPLOY_BOT_CLIENT_ID }}
           tenant-id: ${{ vars.AZURE_TENANT_ID }}
