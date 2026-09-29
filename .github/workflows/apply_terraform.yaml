@@ -32,9 +32,9 @@ jobs:
       run:
         working-directory: ./terraform/main/
     steps:
-      - uses: actions/checkout@v7
-      - uses: hashicorp/setup-terraform@v4
-      - uses: azure/login@v3
+      - uses: actions/checkout@f548e57e544e1ff5a4c46bf1e1b8685f8e4a348a
+      - uses: hashicorp/setup-terraform@b75000b53e9ce4de2b4712237bbdb711bdc92aba
+      - uses: azure/login@487024fc392f1f60cc70bc8a48233c14bc1de77f
         with:
           client-id: ${{ vars.AZURE_APPLY_CLIENT_ID }}
           tenant-id: ${{ vars.AZURE_TENANT_ID }}

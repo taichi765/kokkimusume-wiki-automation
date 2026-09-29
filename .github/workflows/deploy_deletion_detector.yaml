@@ -11,12 +11,12 @@ jobs:
   deploy:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v7
+      - uses: actions/checkout@f548e57e544e1ff5a4c46bf1e1b8685f8e4a348a
         with:
           sparse-checkout: |
             deletion-detector/
             wikiwiki/
-      - uses: azure/login@v3
+      - uses: azure/login@487024fc392f1f60cc70bc8a48233c14bc1de77f
         with:
           client-id: ${{ vars.AZURE_DEPLOY_BOT_CLIENT_ID }}
           tenant-id: ${{ vars.AZURE_TENANT_ID }}

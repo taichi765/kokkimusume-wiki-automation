@@ -17,14 +17,14 @@ jobs:
       run:
         working-directory: page-updater/
     steps:
-      - uses: actions/checkout@v7
+      - uses: actions/checkout@f548e57e544e1ff5a4c46bf1e1b8685f8e4a348a
         with:
           sparse-checkout: |
             wikiwiki/
             types/
             page-updater/
             data/
-      - uses: actions/setup-go@v7
+      - uses: actions/setup-go@90ad2b35f69faf97585ad74d28fa006d2739b7af
         with:
           go-version-file: 'page-updater/go.mod'
           cache-dependency-path: 'page-updater/go.sum'

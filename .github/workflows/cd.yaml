@@ -17,7 +17,7 @@ jobs:
       version: ${{ steps.get-version.outputs.version }}
 
     steps:
-      - uses: actions/checkout@v7
+      - uses: actions/checkout@f548e57e544e1ff5a4c46bf1e1b8685f8e4a348a
         with:
           sparse-checkout:
           fetch-depth: '0'
@@ -46,7 +46,7 @@ jobs:
     with:
       update-discord-bot: ${{ needs.ci.outputs.discord-bot-success == 'true' }}
       update-deletion-detector: ${{ needs.ci.outputs.deletion-detector-success == 'true' }}
-  
+
   update-page:
     needs: ci
     if: ${{ needs.ci.outputs.page-updater-success == 'true' }}
