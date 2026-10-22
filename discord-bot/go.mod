@@ -27,7 +27,7 @@ require (
 	github.com/google/go-github/v88 v88.0.0
 	github.com/google/go-querystring v1.2.0 // indirect
 	github.com/gorilla/websocket v1.5.3 // indirect
-	github.com/klauspost/compress v1.18.4 // indirect
+	github.com/klauspost/compress v1.18.7 // indirect
 	github.com/sasha-s/go-csync v0.0.0-20240107134140-fcbab37b09ad // indirect
 	github.com/stretchr/testify v1.12.1
 	golang.org/x/crypto v0.52.0 // indirect
