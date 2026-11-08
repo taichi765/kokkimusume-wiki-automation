@@ -33,7 +33,7 @@ jobs:
             types/
             wikiwiki/
             page-updater/
-      - uses: actions/setup-go@90ad2b35f69faf97585ad74d28fa006d2739b7af
+      - uses: actions/setup-go@802e89cd7394b98352d79117a8b463bbfc2fdacf
         with:
           go-version-file: ./page-updater/go.mod
           cache-dependency-path: ./page-updater/go.sum
@@ -53,7 +53,7 @@ jobs:
           sparse-checkout: |
             discord-bot/
             types/
-      - uses: actions/setup-go@90ad2b35f69faf97585ad74d28fa006d2739b7af
+      - uses: actions/setup-go@802e89cd7394b98352d79117a8b463bbfc2fdacf
         with:
             go-version-file: ./discord-bot/go.mod
             cache-dependency-path: ./discord-bot/go.sum
@@ -73,7 +73,7 @@ jobs:
           sparse-checkout: |
             deletion-detector/
             wikiwiki/
-      - uses: actions/setup-go@90ad2b35f69faf97585ad74d28fa006d2739b7af
+      - uses: actions/setup-go@802e89cd7394b98352d79117a8b463bbfc2fdacf
         with:
           go-version-file: ./deletion-detector/go.mod
           cache-dependency-path: ./deletion-detector/go.sum
