@@ -3,7 +3,7 @@ module github.com/taichi765/kokkimusume-wiki-automation/discord-bot
 go 1.26.5
 
 require (
-	github.com/disgoorg/disgo v0.19.6
+	github.com/disgoorg/disgo v0.20.0
 	github.com/joho/godotenv v1.5.1
 	github.com/taichi765/kokkimusume-wiki-automation/types v0.0.0
 )
@@ -19,7 +19,7 @@ replace github.com/taichi765/kokkimusume-wiki-automation/types => ../types/
 
 require (
 	github.com/bradleyfalzon/ghinstallation/v2 v2.19.0
-	github.com/disgoorg/godave v0.1.0 // indirect
+	github.com/disgoorg/godave v0.3.0 // indirect
 	github.com/disgoorg/json/v2 v2.0.0 // indirect
 	github.com/disgoorg/omit v1.0.0 // indirect
 	github.com/disgoorg/snowflake/v2 v2.0.3
@@ -27,7 +27,7 @@ require (
 	github.com/google/go-github/v88 v88.0.0
 	github.com/google/go-querystring v1.2.0 // indirect
 	github.com/gorilla/websocket v1.5.3 // indirect
-	github.com/klauspost/compress v1.18.7 // indirect
+	github.com/klauspost/compress v1.19.0 // indirect
 	github.com/sasha-s/go-csync v0.0.0-20240107134140-fcbab37b09ad // indirect
 	github.com/stretchr/testify v1.12.1
 	golang.org/x/crypto v0.52.0 // indirect
